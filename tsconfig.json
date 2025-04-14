@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "dist/esm/src",
+    "module": "ESNext",
+    "target": "ES5",
+    "lib": ["ES7", "DOM", "ES2015", "ES6", "ES2017", "ES2018", "ES2023"],
+    "declaration": true,
+    "moduleResolution": "Node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "ignoreDeprecations": "5.0",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "skipLibCheck": true
+  },
+  "include": ["src", "src/types/styled.d.ts", "css.d.ts", "svg.d.ts"]
+}
