@@ -28,12 +28,9 @@ import { KalendraCalendar } from "kalendra";
 
 ```tsx
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { KalendraCalendar } from "kalendra"; // Import the component
 import { parentActions } from "./store/actions"; // Replace with actual path to your actions
-import { showToast } from "./utils"; // Replace with your toast notification utility
-import { uuid4 } from "uuid"; // Make sure to install uuid library
 
 const CalendarExample = ({
   theme,
@@ -44,7 +41,6 @@ const CalendarExample = ({
   duration,
   user,
 }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -56,26 +52,12 @@ const CalendarExample = ({
       }}
       eventTypeId={event_type_id}
       kalendra_user_id={kalendra_user_id}
-      onSuccess={() => {
-        setIsSuccess(true);
-        dispatch(parentActions.getTherapyInfo() as any); // Dispatch your custom action
-        navigate?.(); // Navigate after success
-      }}
-      onError={(error) => {
-        console.log(error);
-        showToast({
-          message: "Something went wrong",
-          type: "error",
-        });
-      }}
+      onSuccess={onSuccess}
+      onError={onError}
       responses={{
-        name: userInfo?.user?.full_name || userInfo?.full_name || "",
-        email: userInfo?.user?.email || userInfo?.email || "",
-        "db-email": userInfo?.user?.email || userInfo?.email || "",
-        "profile-id": userInfo?.id || "",
-        "phone-number": userInfo?.user?.phone_number || user.phone_number || "",
-        "recording-consent-metadata": JSON.stringify(metadata || {}),
-        session_uuid: uuid4(),
+        name: "name"
+        email: "example@gmail.com",
+        "phone-number": "12345678",
       }}
       duration={duration}
     />
@@ -101,10 +83,7 @@ The `KalendraCalendar` component accepts the following props:
     {
       name: 'John Doe',
       email: 'johndoe@example.com',
-      'profile-id': '123456',
       'phone-number': '555-555-5555',
-      session_uuid: 'uuid4-generated-id',
-      'recording-consent-metadata': '{}'
     }
     ```
 - `duration` (number) - Duration of the event in minutes (optional) used to auto populate the event duration.
@@ -137,7 +116,6 @@ The `onSuccess` and `onError` callbacks allow you to handle the outcome of the c
 ```tsx
 onSuccess={() => {
   setIsSuccess(true);
-  dispatch(parentActions.getTherapyInfo() as any);
   navigate?.();
 }}
 ```
