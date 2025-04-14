@@ -1,6 +1,8 @@
-# KalendraCalendar React Component
+# KalendraBookingCalendar React Component
 
-`KalendraCalendar` is a customizable calendar component built for managing events with features such as user-specific responses, session management, and error handling. This component can be used in any React-based project and allows seamless integration with your application's back-end to manage event data and user interactions.
+`KalendraCalendar` is a themeable and customizable booking component built for managing events with features such as user-specific responses, event booking, with success and error handling. This component can be used in any React-based project and allows seamless integration with your application's and Kalendra scheduling platform.
+
+![Kalendra Calendar Screenshot](./image.png)
 
 ## Installation
 
