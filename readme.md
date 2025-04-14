@@ -114,7 +114,8 @@ The `onSuccess` and `onError` callbacks allow you to handle the outcome of the c
 ### Example of `onSuccess` Usage:
 
 ```tsx
-onSuccess={() => {
+onSuccess={(response) => {
+  console.log(response);
   setIsSuccess(true);
   navigate?.();
 }}

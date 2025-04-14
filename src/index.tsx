@@ -29,28 +29,6 @@ export const KalendraCalendar = ({
   onError,
   onSuccess,
 }: Props) => {
-  const [bookingInitializing, setBookingInitializing] = useState(true);
-  const { data: eventTypeSetting, isLoading: isFetchingEventSettings } =
-    usePocketBaseQuery<EventTypeSettings>({
-      collectionName: collectionNames.event_type_settings,
-      single: true,
-      options: {
-        filter: `event_type = "${eventTypeId}" && user = "${kalendra_user_id}"`,
-        expand: "user, event_type",
-      },
-      skip: !eventTypeId || !kalendra_user_id,
-    });
-  const { data: availability, isLoading } = usePocketBaseQuery<
-    Array<Availability>
-  >({
-    collectionName: collectionNames.availability,
-    options: {
-      filter: `user = "${kalendra_user_id}" && organization = "${eventTypeSetting?.expand?.event_type?.organization}"`,
-      expand: "user",
-    },
-    skip:
-      !kalendra_user_id || !eventTypeSetting?.expand?.event_type?.organization,
-  });
   const {
     data: bookingToBeRescheduled,
     isLoading: isFetchingBookingToReschedule,
@@ -59,17 +37,47 @@ export const KalendraCalendar = ({
     id: bookingToBeRescheduledId,
     skip: !bookingToBeRescheduledId,
   });
+  const [bookingInitializing, setBookingInitializing] = useState(true);
+  const userId = useMemo(
+    () => bookingToBeRescheduled?.user || kalendra_user_id,
+    [bookingToBeRescheduled, kalendra_user_id]
+  );
+  const eventId = useMemo(
+    () => bookingToBeRescheduled?.eventType || eventTypeId,
+    [bookingToBeRescheduled, eventTypeId]
+  );
+  const { data: eventTypeSetting, isLoading: isFetchingEventSettings } =
+    usePocketBaseQuery<EventTypeSettings>({
+      collectionName: collectionNames.event_type_settings,
+      single: true,
+      options: {
+        filter: `event_type = "${eventId}" && user = "${userId}"`,
+        expand: "user, event_type",
+      },
+      skip: !eventId || !userId,
+    });
+  const { data: availability, isLoading } = usePocketBaseQuery<
+    Array<Availability>
+  >({
+    collectionName: collectionNames.availability,
+    options: {
+      filter: `user = "${userId}" && organization = "${eventTypeSetting?.expand?.event_type?.organization}"`,
+      expand: "user",
+    },
+    skip: !userId || !eventTypeSetting?.expand?.event_type?.organization,
+  });
+
   const { data: bookings, isLoading: isFetchingBooking } =
     usePocketBaseEndpoint<Array<Booking>>({
       url: "/get-user-bookings",
       options: {
         method: "POST",
         body: {
-          userId: kalendra_user_id,
-          eventTypeId,
+          userId,
+          eventTypeId: eventId,
         },
       },
-      skip: !kalendra_user_id || !eventTypeId,
+      skip: !userId || !eventId,
     });
 
   const defaultAvailability = useMemo(

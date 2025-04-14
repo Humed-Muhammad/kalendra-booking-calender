@@ -1,16 +1,21 @@
 {
   "name": "kalendra",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "main": "./lib/src/index.js",
   "module": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/Humed-Muhammad/kalendra-booking-calender/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Humed-Muhammad/kalendra-booking-calender.git"
+  },
   "keywords": [
-    "fetching data",
-    "react",
-    "react-redux",
-    "redux-toolkit",
-    "snap-fetch",
-    "snap-fetch query"
+    "kalendra",
+    "booking",
+    "scheduling system",
+    "calendar"
   ],
   "files": [
     "/lib"
