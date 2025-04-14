@@ -1,5 +1,5 @@
 // KalendraLoader.tsx
-import { Box } from "src/Core";
+import { Box } from "../Core/index";
 import styled, { keyframes } from "styled-components";
 
 const l9_0 = keyframes`
