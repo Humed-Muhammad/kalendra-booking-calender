@@ -16,7 +16,7 @@ import {
   useState,
 } from "react";
 import { Calendar } from "./SyledCalendar";
-import { numuwTheme } from "./theme";
+import { darkTheme } from "./theme";
 import {
   Box,
   CenterColumn,
@@ -278,7 +278,7 @@ export const BookingCalendar = ({
 
   if (isFetching) {
     return (
-      <Container height={440}>
+      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
         <KalendraLoader />
       </Container>
     );
@@ -288,7 +288,7 @@ export const BookingCalendar = ({
     return <EventTypeError />;
 
   return (
-    <ThemeProvider theme={theme ?? numuwTheme}>
+    <ThemeProvider theme={theme ?? darkTheme}>
       <Container
         style={{
           transition: "all 0.3s ease-in-out",

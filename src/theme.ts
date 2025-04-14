@@ -61,34 +61,3 @@ export const darkTheme = {
     none: "none",
   },
 };
-
-export const numuwTheme = {
-  breakpoints: ["320px", "576px", "768px", "992px", "1200px", "1400px"],
-  colors: {
-    background: "#ffffff", // white
-    border: "#eeeeee", // borderGray100
-    lightGray: "#d9d9d9", // black.300
-    text: "#262626", // mainText
-    headCell: "#171717", // textPrimary
-    dayHoverBg: "#8450a0", // typePurpure.100
-    dayHoverText: "#ffffff", // white
-    daySelectedBg: "#8450a0", // typeDarkblue
-    daySelectedText: "#fcf3f3", // primary.100
-    dayDisabled: "#f0f0f0", // black.200
-    dayRangeMiddle: "#eca9a4", // primary.800
-    icon: "#8c8c8c", // secondaryText
-    transparent: "transparent",
-    dayBg: "#fdd9d6", // primary.600
-    error: "#dc3545", // error
-  },
-  shadows: {
-    base: "0px 4px 4px 0px #00000040",
-    medium: "0px 4px 8px 0px #00000040",
-    normal: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-    sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-    lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-    xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-    none: "none",
-  },
-};
