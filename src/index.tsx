@@ -16,6 +16,7 @@ interface Props {
   onError?: (error: any) => void;
   theme?: DefaultTheme;
   styles?: CSSProperties;
+  bookingToBeRescheduledId?: string;
 }
 export const KalendraCalendar = ({
   kalendra_user_id,
@@ -24,6 +25,7 @@ export const KalendraCalendar = ({
   responses,
   theme,
   duration,
+  bookingToBeRescheduledId,
   onError,
   onSuccess,
 }: Props) => {
@@ -49,7 +51,14 @@ export const KalendraCalendar = ({
     skip:
       !kalendra_user_id || !eventTypeSetting?.expand?.event_type?.organization,
   });
-
+  const {
+    data: bookingToBeRescheduled,
+    isLoading: isFetchingBookingToReschedule,
+  } = usePocketBaseQuery<Booking>({
+    collectionName: collectionNames.bookings,
+    id: bookingToBeRescheduledId,
+    skip: !bookingToBeRescheduledId,
+  });
   const { data: bookings, isLoading: isFetchingBooking } =
     usePocketBaseEndpoint<Array<Booking>>({
       url: "/get-user-bookings",
@@ -83,13 +92,15 @@ export const KalendraCalendar = ({
         isLoading ||
         isFetchingBooking ||
         isFetchingEventSettings ||
-        bookingInitializing
+        bookingInitializing ||
+        isFetchingBookingToReschedule
       }
       onSuccess={onSuccess}
       onError={onError}
       duration={duration}
       theme={theme}
       styles={styles}
+      bookingToBeRescheduled={bookingToBeRescheduled}
     />
   );
 };
