@@ -10,6 +10,7 @@ interface Props {
     onError?: (error: any) => void;
     theme?: DefaultTheme;
     styles?: CSSProperties;
+    bookingToBeRescheduledId?: string;
 }
-export declare const KalendraCalendar: ({ kalendra_user_id, styles, eventTypeId, responses, theme, duration, onError, onSuccess, }: Props) => JSX.Element;
+export declare const KalendraCalendar: ({ kalendra_user_id, styles, eventTypeId, responses, theme, duration, bookingToBeRescheduledId, onError, onSuccess, }: Props) => JSX.Element;
 export {};
