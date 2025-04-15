@@ -168,7 +168,5 @@ onError={(error) => {
 
 This software is under a **Commercial Software License**.
 
-You **cannot** use this library in commercial projects, paid products, or SaaS platforms without a valid commercial license.
-
 📩 For licensing and inquiries, contact: humedessie@gmail.com  
 📄 See the full license in the [LICENSE](./LICENSE) file.
