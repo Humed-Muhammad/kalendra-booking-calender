@@ -13,6 +13,8 @@ type Props = {
     duration?: number;
     theme?: DefaultTheme;
     styles?: CSSProperties | undefined;
+    LoadingIndicator: JSX.Element | undefined;
+    NoEventError: JSX.Element | undefined;
 };
-export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, onError, onSuccess, }: Props) => JSX.Element;
+export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, LoadingIndicator, NoEventError, onError, onSuccess, }: Props) => JSX.Element;
 export {};

@@ -17,6 +17,8 @@ interface Props {
   theme?: DefaultTheme;
   styles?: CSSProperties;
   bookingToBeRescheduledId?: string;
+  LoadingIndicator?: JSX.Element;
+  NoEventError?: JSX.Element;
 }
 export const KalendraCalendar = ({
   kalendra_user_id,
@@ -26,6 +28,8 @@ export const KalendraCalendar = ({
   theme,
   duration,
   bookingToBeRescheduledId,
+  LoadingIndicator,
+  NoEventError,
   onError,
   onSuccess,
 }: Props) => {
@@ -109,6 +113,8 @@ export const KalendraCalendar = ({
       theme={theme}
       styles={styles}
       bookingToBeRescheduled={bookingToBeRescheduled}
+      LoadingIndicator={LoadingIndicator}
+      NoEventError={NoEventError}
     />
   );
 };

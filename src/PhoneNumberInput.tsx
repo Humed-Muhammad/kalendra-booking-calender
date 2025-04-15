@@ -23,7 +23,6 @@ const Label = styled.label`
 const StyledPhoneInput = styled(PhoneInput)`
   .form-control {
     width: 100%;
-    height: 48px;
     font-size: 16px;
     padding-left: 58px;
     border-radius: 0px;

@@ -87,6 +87,8 @@ The `KalendraCalendar` component accepts the following props:
     }
     ```
 - `duration` (number) - Duration of the event in minutes (optional) used to auto populate the event duration.
+- `LoadingIndicator` (JSX) - (Optional) A custom loading component to be displayed while the calendar is loading.
+- `NoEventError` (JSX) - (Optional) A custom component to be displayed when there are no events to display or when something goes wrong.
 
 ### Example of `responses` Object:
 
@@ -163,6 +165,35 @@ onError={(error) => {
   # or
   yarn add react-router-dom
   ```
+
+# Theming
+
+```ts
+// Example theme (Our dark theme)
+// You can create your own theme by modifying this object
+// And create dark or light as you like or any other theme
+export const lightTheme = {
+  breakpoints: ["320px", "576px", "768px", "992px", "1200px", "1400px"],
+  colors: {
+    rootLoaderColor: "#ffa516", // The color of the loader when the KalendraCalander is initializing
+    background: "white",
+    border: "#cbd5e1",
+    lightGray: "#cbd5e1",
+    text: "black",
+    headCell: "black",
+    dayHoverBg: "#3b3b4f",
+    dayHoverText: "white",
+    daySelectedBg: "#1e293b",
+    daySelectedText: "#f8fafc",
+    dayDisabled: "#cbd5e1",
+    dayRangeMiddle: "#475569",
+    icon: "#475569",
+    transparent: "transparent",
+    dayBg: "#cbd5e1",
+    error: "#f87171",
+  },
+};
+```
 
 ## License
 

@@ -1,5 +1,6 @@
 import {
   collectionNames,
+  db,
   formatToTimeZone,
   minimumNoticeTypeValue,
 } from "./utils";
@@ -61,6 +62,8 @@ type Props = {
   duration?: number;
   theme?: DefaultTheme;
   styles?: CSSProperties | undefined;
+  LoadingIndicator: JSX.Element | undefined;
+  NoEventError: JSX.Element | undefined;
 };
 export const BookingCalendar = ({
   availability,
@@ -72,6 +75,8 @@ export const BookingCalendar = ({
   duration,
   responses,
   bookings,
+  LoadingIndicator,
+  NoEventError,
   onError,
   onSuccess,
 }: Props) => {
@@ -79,6 +84,7 @@ export const BookingCalendar = ({
     () => Boolean(bookingToBeRescheduled),
     [bookingToBeRescheduled]
   );
+  const [isReschedulingLoading, setIsReschedulingLoading] = useState(false);
 
   const [date, setDate] = useState<Date | undefined>();
   const [slot, setSlot] = useState<Date | undefined>();
@@ -187,6 +193,10 @@ export const BookingCalendar = ({
 
   const [activeTab, setActiveTab] = useState("12h");
   useEffect(() => {
+    if (eventTypeSetting?.settings?.length > 0) {
+      setIncrementStep(eventTypeSetting?.settings?.length);
+      return;
+    }
     if (duration) {
       setIncrementStep(Number(duration));
     } else {
@@ -212,9 +222,47 @@ export const BookingCalendar = ({
   });
   // replace with success component later
 
-  const onSubmit = (responses: Record<string, any>) => {
-    mutate(
-      {
+  const onSubmit = async (responses: Record<string, any>) => {
+    const body = {
+      bookingId: bookingToBeRescheduled?.id,
+      responses,
+      eventType: eventTypeSetting?.event_type,
+      user: eventTypeSetting?.user,
+      attendees: [
+        {
+          name: eventTypeSetting?.expand.user?.name,
+          email: eventTypeSetting?.expand.user?.email,
+          host: true,
+        },
+        {
+          name: responses.name,
+          email: responses.email,
+          host: false,
+        },
+      ],
+      startTime: slot,
+      endTime: addMinutes(slot as Date, incrementStep as number),
+      status: isRescheduling ? "rescheduled" : "confirmed",
+      recurring: false,
+      title: eventTypeSetting?.settings?.title,
+      description: eventTypeSetting?.settings?.description,
+      location: eventTypeSetting?.settings?.location,
+      duration: incrementStep,
+    };
+    if (isRescheduling) {
+      setIsReschedulingLoading(true);
+      await db
+        .send<Booking>("/reschedule-booking", {
+          method: "PATCH",
+          body,
+        })
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
+          setIsReschedulingLoading(false);
+        });
+    } else {
+      mutate({
         responses,
         eventType: eventTypeSetting?.event_type,
         user: eventTypeSetting?.user,
@@ -237,26 +285,21 @@ export const BookingCalendar = ({
         title: eventTypeSetting?.settings?.title,
         description: eventTypeSetting?.settings?.description,
         location: eventTypeSetting?.settings?.location,
-        // rescheduledBy: user?.id,
         duration: incrementStep,
-      },
-      {
-        update: isRescheduling,
-        id: bookingToBeRescheduled?.id,
-      }
-    )
-      .then((fulfilled) => {
-        if (fulfilled) {
-          if (onSuccess) {
-            onSuccess(fulfilled);
-          }
-        }
       })
-      .catch((error) => {
-        if (onError) {
-          onError(error);
-        }
-      });
+        .then((fulfilled) => {
+          if (fulfilled) {
+            if (onSuccess) {
+              onSuccess(fulfilled);
+            }
+          }
+        })
+        .catch((error) => {
+          if (onError) {
+            onError(error);
+          }
+        });
+    }
   };
 
   const isAllAnswered = useMemo(() => {
@@ -279,13 +322,13 @@ export const BookingCalendar = ({
   if (isFetching) {
     return (
       <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
-        <KalendraLoader />
+        {LoadingIndicator ? LoadingIndicator : <KalendraLoader />}
       </Container>
     );
   }
 
   if ((!eventTypeSetting || !availability) && !isFetching)
-    return <EventTypeError />;
+    return NoEventError ? NoEventError : <EventTypeError />;
 
   return (
     <ThemeProvider theme={theme ?? darkTheme}>
@@ -490,11 +533,11 @@ export const BookingCalendar = ({
               }}
               fields={eventTypeSetting?.settings?.bookingQuestions}
               bookingQuestions={{
-                ...(bookingToBeRescheduled?.responses ?? {}),
                 ...(responses ?? {}),
+                ...(bookingToBeRescheduled?.responses ?? {}),
               }}
               onSubmit={onSubmit}
-              isLoading={isLoading}
+              isLoading={isLoading || isReschedulingLoading}
             />
           </Flex>
         ) : (
@@ -609,9 +652,14 @@ export const BookingCalendar = ({
                                   e.stopPropagation();
                                   onSubmit(responses!);
                                 }}
+                                disabled={isLoading || isReschedulingLoading}
                               >
-                                <Text color="background" variant="light">
-                                  {isLoading ? <LoadingDots /> : "Book"}
+                                <Text color="text" variant="light">
+                                  {isLoading || isReschedulingLoading ? (
+                                    <LoadingDots />
+                                  ) : (
+                                    "Book"
+                                  )}
                                 </Text>
                               </Button>
                             )}
