@@ -1,6 +1,6 @@
 {
   "name": "kalendra",
-  "version": "0.0.16",
+  "version": "0.0.19",
   "main": "./lib/src/index.js",
   "module": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
@@ -50,17 +50,15 @@
     "rollup-plugin-typescript2": "^0.32.1",
     "styled-components": "^6.1.17",
     "styled-system": "^5.1.5",
-    "typescript": "^5.3.3"
-  },
-  "peerDependencies": {
-    "react": ">= 17.0.2"
-  },
-  "dependencies": {
+    "typescript": "^5.3.3",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "formik": "^2.4.6",
     "lucide-react": "^0.487.0",
     "react-phone-input-2": "^2.15.1",
     "yup": "^1.6.1"
+  },
+  "peerDependencies": {
+    "react": ">= 17.0.2"
   }
 }

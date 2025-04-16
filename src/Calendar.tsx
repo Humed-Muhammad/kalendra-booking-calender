@@ -102,15 +102,6 @@ export const BookingCalendar = ({
   >([]);
 
   // Defaults
-  useEffect(() => {
-    if (bookingToBeRescheduled) {
-      // setSlot(new Date(bookingToBeRescheduled?.startTime));
-      setIncrementStep(
-        bookingToBeRescheduled?.duration ??
-          eventTypeSetting?.settings?.defaultDuration
-      );
-    }
-  }, [bookingToBeRescheduled, eventTypeSetting]);
 
   const { getTimeSlots } = useGetTimeSlots({
     availability,
@@ -173,17 +164,17 @@ export const BookingCalendar = ({
   );
 
   // Update time slots when date changes
-  useEffect(() => {
-    if (date) {
-      const slots = getTimeSlots(
-        date,
-        Intl.DateTimeFormat().resolvedOptions().timeZone
-      );
-      setAvailableTimeSlots(slots);
-    } else {
-      setAvailableTimeSlots([]);
-    }
-  }, [date, getTimeSlots]);
+  // useEffect(() => {
+  //   if (date) {
+  //     const slots = getTimeSlots(
+  //       date,
+  //       Intl.DateTimeFormat().resolvedOptions().timeZone
+  //     );
+  //     setAvailableTimeSlots(slots);
+  //   } else {
+  //     setAvailableTimeSlots([]);
+  //   }
+  // }, [date, getTimeSlots]);
 
   // useEffect(() => {
   //   if (user?.timezone) {
@@ -193,6 +184,10 @@ export const BookingCalendar = ({
 
   const [activeTab, setActiveTab] = useState("12h");
   useEffect(() => {
+    if (bookingToBeRescheduled?.duration) {
+      setIncrementStep(bookingToBeRescheduled.duration);
+      return;
+    }
     if (eventTypeSetting?.settings?.length > 0) {
       setIncrementStep(eventTypeSetting?.settings?.length);
       return;
@@ -214,6 +209,7 @@ export const BookingCalendar = ({
     eventTypeSetting?.settings?.length,
     eventTypeSetting?.settings?.timeSlots,
     duration,
+    bookingToBeRescheduled?.duration,
   ]);
   // Use booking  settings them not this
   // const { theme } = useTheme();
@@ -318,6 +314,29 @@ export const BookingCalendar = ({
       return response !== undefined && response !== null && response !== "";
     });
   }, [responses, eventTypeSetting?.settings?.bookingQuestions]);
+  const formatDisplayTime = useCallback(
+    (time: { formattedTime: string; utcTime: Date }) => {
+      let displayTime = time.formattedTime;
+
+      if (activeTab === "24h") {
+        const [hourMin, period] = time.formattedTime.split(/([ap]m)$/);
+        const [hour, minute] = hourMin.split(":").map(Number);
+        let hour24 = hour;
+
+        if (period === "pm" && hour !== 12) {
+          hour24 += 12;
+        } else if (period === "am" && hour === 12) {
+          hour24 = 0;
+        }
+
+        displayTime = `${hour24.toString().padStart(2, "0")}:${minute
+          .toString()
+          .padStart(2, "0")}`;
+      }
+      return displayTime;
+    },
+    [activeTab]
+  );
 
   if (isFetching) {
     return (
@@ -409,9 +428,7 @@ export const BookingCalendar = ({
                   setIncrementStep={setIncrementStep}
                 />
               ) : (
-                <Text>
-                  {formatSlotMinutes(eventTypeSetting?.settings?.length)}
-                </Text>
+                <Text>{formatSlotMinutes(Number(incrementStep ?? 0))}</Text>
               )}
             </CenterRow>
             {isRescheduling && (
@@ -552,7 +569,17 @@ export const BookingCalendar = ({
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(date) => {
+                  setAvailableTimeSlots([]);
+                  if (date) {
+                    const slots = getTimeSlots(
+                      date,
+                      Intl.DateTimeFormat().resolvedOptions().timeZone
+                    );
+                    setAvailableTimeSlots(slots);
+                  }
+                  setDate(date);
+                }}
                 disabled={(date) => !hasAvailability(date)}
               />
             </CenterColumn>
@@ -600,72 +627,51 @@ export const BookingCalendar = ({
                 <TabsContent>
                   <TimeSlotContainer>
                     {availableTimeSlots.length > 0 ? (
-                      availableTimeSlots.map((time) => {
-                        let displayTime = time.formattedTime;
-
-                        if (activeTab === "24h") {
-                          const [hourMin, period] =
-                            time.formattedTime.split(/([ap]m)$/);
-                          const [hour, minute] = hourMin.split(":").map(Number);
-                          let hour24 = hour;
-
-                          if (period === "pm" && hour !== 12) {
-                            hour24 += 12;
-                          } else if (period === "am" && hour === 12) {
-                            hour24 = 0;
-                          }
-
-                          displayTime = `${hour24
-                            .toString()
-                            .padStart(2, "0")}:${minute
-                            .toString()
-                            .padStart(2, "0")}`;
-                        }
-
-                        return (
-                          <CenterRow width="100%" gap={"8px"}>
-                            <TimeSlot
-                              bg={
-                                time.utcTime === slot
-                                  ? "lightGray"
-                                  : "transparent"
+                      availableTimeSlots.map((time, index) => (
+                        <CenterRow key={index} width="100%" gap={"8px"}>
+                          <TimeSlot
+                            bg={
+                              time.utcTime === slot
+                                ? "lightGray"
+                                : "transparent"
+                            }
+                            onClick={() => {
+                              setSlot(time.utcTime);
+                              // check if all question are answered if not open the form
+                              if (isAllAnswered) {
+                                setShowSubmitButton(true);
+                              } else {
+                                onOpen();
                               }
-                              onClick={() => {
-                                setSlot(time.utcTime);
-                                // check if all question are answered if not open the form
-                                if (isAllAnswered) {
-                                  setShowSubmitButton(true);
-                                } else {
-                                  onOpen();
-                                }
+                            }}
+                            key={time.formattedTime}
+                            selected={time.utcTime === slot}
+                          >
+                            <Text variant="light">
+                              {formatDisplayTime(time)}
+                            </Text>
+                          </TimeSlot>
+                          {showSubmitButton && time.utcTime === slot && (
+                            <Button
+                              flexGrow={1}
+                              bg="dayHoverBg"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSubmit(responses!);
                               }}
-                              key={time.formattedTime}
-                              selected={time.utcTime === slot}
+                              disabled={isLoading || isReschedulingLoading}
                             >
-                              <Text variant="light">{displayTime}</Text>
-                            </TimeSlot>
-                            {showSubmitButton && time.utcTime === slot && (
-                              <Button
-                                flexGrow={1}
-                                bg="dayHoverBg"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onSubmit(responses!);
-                                }}
-                                disabled={isLoading || isReschedulingLoading}
-                              >
-                                <Text color="dayColor" variant="light">
-                                  {isLoading || isReschedulingLoading ? (
-                                    <LoadingDots />
-                                  ) : (
-                                    "Book"
-                                  )}
-                                </Text>
-                              </Button>
-                            )}
-                          </CenterRow>
-                        );
-                      })
+                              <Text color="dayColor" variant="light">
+                                {isLoading || isReschedulingLoading ? (
+                                  <LoadingDots />
+                                ) : (
+                                  "Book"
+                                )}
+                              </Text>
+                            </Button>
+                          )}
+                        </CenterRow>
+                      ))
                     ) : (
                       <Text overflowY="hidden" height="max-content">
                         {date

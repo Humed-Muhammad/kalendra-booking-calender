@@ -40,12 +40,15 @@ export const useGetTimeSlots = ({
         (override) => override.date === formattedDate
       );
 
-      let availabilityForDay;
-      if (dateOverride) {
-        availabilityForDay = dateOverride.availability;
-      } else {
-        availabilityForDay = availability.availability?.[dayOfWeek];
+      let availabilityForDay = availability.availability?.[dayOfWeek];
+      // Add the date override to the availabilityForDay
+      if (availabilityForDay && dateOverride) {
+        availabilityForDay = [
+          ...availabilityForDay,
+          ...dateOverride.availability,
+        ];
       }
+
       if (!availabilityForDay || availabilityForDay.length === 0) return [];
 
       // Generate time slots based on availability
@@ -87,32 +90,35 @@ export const useGetTimeSlots = ({
           ).toISOString();
         }
       });
-      return slots.filter((slot) => {
-        const slotStart = new Date(slot.utcTime);
-        const slotEnd = new Date(
-          slotStart.getTime() + Number(incrementStep) * 60 * 1000
-        );
-
-        const isOverlapping = bookings?.some((booking) => {
-          const bookingStart = new Date(booking.startTime);
-          const bookingEnd = new Date(booking.endTime);
-
-          // Add buffer time
-          const bufferBefore =
-            eventTypeSetting?.settings?.bufferTimeBefore || 0;
-          const bufferAfter = eventTypeSetting?.settings?.bufferTimeAfter || 0;
-          const bufferedStart = new Date(
-            bookingStart.getTime() - bufferBefore * 60 * 1000
-          );
-          const bufferedEnd = new Date(
-            bookingEnd.getTime() + bufferAfter * 60 * 1000
+      return slots
+        .sort((a, b) => (a.utcTime > b.utcTime ? 1 : -1))
+        .filter((slot) => {
+          const slotStart = new Date(slot.utcTime);
+          const slotEnd = new Date(
+            slotStart.getTime() + Number(incrementStep) * 60 * 1000
           );
 
-          return slotStart < bufferedEnd && slotEnd > bufferedStart;
+          const isOverlapping = bookings?.some((booking) => {
+            const bookingStart = new Date(booking.startTime);
+            const bookingEnd = new Date(booking.endTime);
+
+            // Add buffer time
+            const bufferBefore =
+              eventTypeSetting?.settings?.bufferTimeBefore || 0;
+            const bufferAfter =
+              eventTypeSetting?.settings?.bufferTimeAfter || 0;
+            const bufferedStart = new Date(
+              bookingStart.getTime() - bufferBefore * 60 * 1000
+            );
+            const bufferedEnd = new Date(
+              bookingEnd.getTime() + bufferAfter * 60 * 1000
+            );
+
+            return slotStart < bufferedEnd && slotEnd > bufferedStart;
+          });
+
+          return !isOverlapping;
         });
-
-        return !isOverlapping;
-      });
     },
     [
       availability,
