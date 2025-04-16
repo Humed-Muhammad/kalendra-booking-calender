@@ -257,7 +257,7 @@ export const BookingCalendar = ({
           body,
         })
         .then(onSuccess)
-        .catch(onError)
+        .catch((err: any) => onError?.(err?.response))
         .finally(() => {
           setIsReschedulingLoading(false);
         });
@@ -654,7 +654,7 @@ export const BookingCalendar = ({
                                 }}
                                 disabled={isLoading || isReschedulingLoading}
                               >
-                                <Text color="text" variant="light">
+                                <Text color="dayColor" variant="light">
                                   {isLoading || isReschedulingLoading ? (
                                     <LoadingDots />
                                   ) : (

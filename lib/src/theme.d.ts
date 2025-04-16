@@ -47,6 +47,7 @@ export declare const darkTheme: {
         icon: string;
         transparent: string;
         dayBg: string;
+        dayColor: string;
         error: string;
     };
     shadows: {

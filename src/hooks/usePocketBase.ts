@@ -66,7 +66,7 @@ export const usePocketBaseQuery = <T, K = T>({
         setData(response);
       }
       setSuccess(true);
-    } catch (err) {
+    } catch (err: any) {
       setIsError(true);
       setError(err instanceof Error ? err : new Error("Failed to fetch data"));
     } finally {
@@ -152,13 +152,13 @@ export const usePocketBaseMutation = <T>(
         setSuccess(true);
         payload?.onSuccess?.(response);
         return response;
-      } catch (err) {
+      } catch (err: any) {
         setError(
           err instanceof Error ? err : new Error("Failed to fetch data")
         );
         setIsError(true);
-        payload?.onError?.(err);
-        throw err;
+        payload?.onError?.(err?.response);
+        throw err?.response;
       } finally {
         setIsLoading(false);
       }

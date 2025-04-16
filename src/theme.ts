@@ -48,6 +48,7 @@ export const darkTheme = {
     icon: "#cbd5e1", // Light icons
     transparent: "transparent",
     dayBg: "#27272A", // Slightly lighter than the
+    dayColor: "#f8fafc",
     error: "#f87171",
   },
   shadows: {
