@@ -130,7 +130,9 @@ export const BookingCalendar = ({
 
       if (dateOverride) {
         return (
-          dateOverride.availability && dateOverride.availability.length > 0
+          (dateOverride?.availability &&
+            dateOverride.availability.length > 0) ||
+          Number(availability?.availability?.[dayOfWeek]?.length) > 0
         );
       }
 
