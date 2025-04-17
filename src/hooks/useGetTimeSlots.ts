@@ -6,7 +6,7 @@ import { setHours, setMinutes } from "date-fns";
 import { formatToTimeZone } from "../utils";
 
 type Props = {
-  availability: Availability | undefined;
+  availability: Partial<Availability> | undefined;
   eventTypeSetting: EventTypeSettings | undefined;
   timezone: string;
   incrementStep: number | undefined;
@@ -21,6 +21,7 @@ export const useGetTimeSlots = ({
 }: Props) => {
   const getTimeSlots = useCallback(
     (selectedDate: Date, userTimezone: string = "UTC") => {
+      const incrementTime = Number(incrementStep) * 60 * 1000;
       if (!availability) return [];
       const formattedDate = formatInTimeZone(
         selectedDate,
@@ -48,7 +49,7 @@ export const useGetTimeSlots = ({
           ...dateOverride.availability,
         ];
       }
-
+      // }
       if (!availabilityForDay || availabilityForDay.length === 0) return [];
 
       // Generate time slots based on availability
@@ -71,7 +72,6 @@ export const useGetTimeSlots = ({
         const adjustedEndTime = new Date(
           new Date(endTime).getTime() - bufferAfter * 60 * 1000
         ).toISOString();
-
         let currentTime = startTime;
         while (currentTime < adjustedEndTime) {
           // Convert to user timezone for display
@@ -81,12 +81,20 @@ export const useGetTimeSlots = ({
             "h:mmaaa"
           ); // e.g., "10:30am"
           // skip already booked slots
-
-          slots.push({ formattedTime, utcTime: new Date(currentTime) });
+          const slotExist = slots.find(
+            (s) => s.formattedTime === formattedTime
+          );
+          // const noEnoughTime = new Date(currentTime) + incrementStep
+          const timeGap =
+            new Date(adjustedEndTime).getTime() -
+            new Date(currentTime).getTime();
+          if (!slotExist && timeGap >= incrementTime) {
+            slots.push({ formattedTime, utcTime: new Date(currentTime) });
+          }
 
           // Increment time
           currentTime = new Date(
-            new Date(currentTime).getTime() + Number(incrementStep) * 60 * 1000
+            new Date(currentTime).getTime() + incrementTime
           ).toISOString();
         }
       });
@@ -94,9 +102,7 @@ export const useGetTimeSlots = ({
         .sort((a, b) => (a.utcTime > b.utcTime ? 1 : -1))
         .filter((slot) => {
           const slotStart = new Date(slot.utcTime);
-          const slotEnd = new Date(
-            slotStart.getTime() + Number(incrementStep) * 60 * 1000
-          );
+          const slotEnd = new Date(slotStart.getTime() + incrementTime);
 
           const isOverlapping = bookings?.some((booking) => {
             const bookingStart = new Date(booking.startTime);

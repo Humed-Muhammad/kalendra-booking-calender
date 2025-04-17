@@ -88,6 +88,7 @@ export const DynamicForm = ({
       validationSchema={buildValidationSchema(fields)}
       onSubmit={onSubmit}
       validateOnBlur={false}
+      validateOnMount={false}
     >
       {({ values, handleChange, setFieldValue, errors }) => {
         return (

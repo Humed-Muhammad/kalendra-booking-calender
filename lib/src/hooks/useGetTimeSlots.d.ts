@@ -1,6 +1,6 @@
 import { Availability, Booking, EventTypeSettings } from "../types";
 type Props = {
-    availability: Availability | undefined;
+    availability: Partial<Availability> | undefined;
     eventTypeSetting: EventTypeSettings | undefined;
     timezone: string;
     incrementStep: number | undefined;
