@@ -16,14 +16,14 @@ import { PhoneNumberInput } from "./PhoneNumberInput";
 const buildValidationSchema = (fields: Array<DynamicFormTypes>) => {
   const schema = {};
   fields?.forEach((field) => {
-    const { identifier, type, required } = field;
+    const { identifier, type, required, hidden } = field;
     let stringValidator = Yup.string();
     let emailValidator = Yup.string().email("Invalid email");
     let numberValidator = Yup.number();
     let dateValidator = Yup.date();
     let urlValidator = Yup.string().url("Invalid URL");
     let arrayValidator = Yup.array();
-    if (required) {
+    if (required && !hidden) {
       stringValidator = stringValidator.required(`${field.label} is required`);
       emailValidator = emailValidator.required(`${field.label} is required`);
       numberValidator = numberValidator.required(`${field.label} is required`);
@@ -33,9 +33,7 @@ const buildValidationSchema = (fields: Array<DynamicFormTypes>) => {
     }
 
     if (type === "number") {
-      (schema as Record<string, any>)[identifier] = numberValidator.required(
-        `${field.label} is required`
-      );
+      (schema as Record<string, any>)[identifier] = numberValidator;
     } else if (type === "phone") {
       (schema as Record<string, any>)[identifier] = stringValidator
         .trim()
