@@ -1,8 +1,9 @@
-import PocketBase from 'pocketbase';
+import PocketBase from "pocketbase";
+import { Booking } from "./types";
 export declare const pbUrl = "http://127.0.0.1:8090";
 export declare const formatSlotMinutes: (minutes: number) => string;
 export declare function getGMTOffset(timezone: string): string;
-export declare const getImage: ({ imageName, collectionName, recordId }: {
+export declare const getImage: ({ imageName, collectionName, recordId, }: {
     imageName: string;
     collectionName: string;
     recordId: string;
@@ -59,4 +60,11 @@ export declare const minimumNoticeTypeValue: {
     weeks: string;
     months: string;
 };
+type CreateRoundRobinProps = {
+    body: any;
+    setCreatingRoundRobinBooking: (value: boolean) => void;
+    onSuccess?: (response: Booking) => void;
+    onError?: (error: any) => void;
+};
+export declare const createRoundRobin: ({ body, setCreatingRoundRobinBooking, onError, onSuccess, }: CreateRoundRobinProps) => Promise<Booking>;
 export {};

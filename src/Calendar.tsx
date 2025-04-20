@@ -1,11 +1,12 @@
 import {
   collectionNames,
+  createRoundRobin,
   db,
   formatToTimeZone,
   minimumNoticeTypeValue,
 } from "./utils";
 import { usePocketBaseMutation } from "./hooks/usePocketBase";
-import { Availability, Booking, EventTypeSettings } from "./types";
+import { Availability, Booking, EventTypeSettings, Slot } from "./types";
 import { addMinutes, format } from "date-fns";
 import { CalendarIcon, Globe, Link, TimerIcon } from "lucide-react";
 import {
@@ -51,7 +52,7 @@ import { EventTypeError } from "./NoEventFoundError";
 import { KalendraLoader } from "./icons/KalendraLoader";
 
 type Props = {
-  availability: Availability;
+  availability: Partial<Availability>;
   isFetching: boolean;
   eventTypeSetting: EventTypeSettings;
   bookings: Booking[] | undefined;
@@ -62,8 +63,9 @@ type Props = {
   duration?: number;
   theme?: DefaultTheme;
   styles?: CSSProperties | undefined;
-  LoadingIndicator: JSX.Element | undefined;
-  NoEventError: JSX.Element | undefined;
+  LoadingIndicator?: JSX.Element | undefined;
+  NoEventError?: JSX.Element | undefined;
+  isRoundRobin?: boolean;
 };
 export const BookingCalendar = ({
   availability,
@@ -77,9 +79,12 @@ export const BookingCalendar = ({
   bookings,
   LoadingIndicator,
   NoEventError,
+  isRoundRobin,
   onError,
   onSuccess,
 }: Props) => {
+  const [creatingRoundRobinBooking, setCreatingRoundRobinBooking] =
+    useState(false);
   const isRescheduling = useMemo(
     () => Boolean(bookingToBeRescheduled),
     [bookingToBeRescheduled]
@@ -87,19 +92,14 @@ export const BookingCalendar = ({
   const [isReschedulingLoading, setIsReschedulingLoading] = useState(false);
 
   const [date, setDate] = useState<Date | undefined>();
-  const [slot, setSlot] = useState<Date | undefined>();
+  const [slot, setSlot] = useState<Slot | undefined>();
   const [showSubmitButton, setShowSubmitButton] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [timezone, setTimezone] = useState<string>(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
   const [incrementStep, setIncrementStep] = useState<number | undefined>();
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<
-    {
-      formattedTime: string;
-      utcTime: Date;
-    }[]
-  >([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Slot[]>([]);
 
   // Defaults
 
@@ -156,33 +156,14 @@ export const BookingCalendar = ({
         if (noticeDate) {
           return (
             date >= noticeDate &&
-            availability.availability?.[dayOfWeek]?.length > 0
+            Number(availability.availability?.[dayOfWeek]?.length) > 0
           );
         }
       }
-      return availability.availability?.[dayOfWeek]?.length > 0;
+      return Number(availability.availability?.[dayOfWeek]?.length) > 0;
     },
     [availability, eventTypeSetting]
   );
-
-  // Update time slots when date changes
-  // useEffect(() => {
-  //   if (date) {
-  //     const slots = getTimeSlots(
-  //       date,
-  //       Intl.DateTimeFormat().resolvedOptions().timeZone
-  //     );
-  //     setAvailableTimeSlots(slots);
-  //   } else {
-  //     setAvailableTimeSlots([]);
-  //   }
-  // }, [date, getTimeSlots]);
-
-  // useEffect(() => {
-  //   if (user?.timezone) {
-  //     setTimezone(user?.timezone);
-  //   }
-  // }, [user?.timezone]);
 
   const [activeTab, setActiveTab] = useState("12h");
   useEffect(() => {
@@ -238,8 +219,8 @@ export const BookingCalendar = ({
           host: false,
         },
       ],
-      startTime: slot,
-      endTime: addMinutes(slot as Date, incrementStep as number),
+      startTime: slot?.utcTime,
+      endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
       status: isRescheduling ? "rescheduled" : "confirmed",
       recurring: false,
       title: eventTypeSetting?.settings?.title,
@@ -260,43 +241,52 @@ export const BookingCalendar = ({
           setIsReschedulingLoading(false);
         });
     } else {
-      mutate({
-        responses,
-        eventType: eventTypeSetting?.event_type,
-        user: eventTypeSetting?.user,
-        attendees: [
-          {
-            name: eventTypeSetting?.expand.user?.name,
-            email: eventTypeSetting?.expand.user?.email,
-            host: true,
-          },
-          {
-            name: responses.name,
-            email: responses.email,
-            host: false,
-          },
-        ],
-        startTime: slot,
-        endTime: addMinutes(slot as Date, incrementStep as number),
-        status: isRescheduling ? "rescheduled" : "confirmed",
-        recurring: false,
-        title: eventTypeSetting?.settings?.title,
-        description: eventTypeSetting?.settings?.description,
-        location: eventTypeSetting?.settings?.location,
-        duration: incrementStep,
-      })
-        .then((fulfilled) => {
-          if (fulfilled) {
-            if (onSuccess) {
-              onSuccess(fulfilled);
-            }
-          }
-        })
-        .catch((error) => {
-          if (onError) {
-            onError(error);
-          }
+      if (isRoundRobin) {
+        createRoundRobin({
+          body: { ...body, users: slot?.users },
+          setCreatingRoundRobinBooking,
+          onError,
+          onSuccess,
         });
+      } else {
+        mutate({
+          responses,
+          eventType: eventTypeSetting?.event_type,
+          user: eventTypeSetting?.user,
+          attendees: [
+            {
+              name: eventTypeSetting?.expand.user?.name,
+              email: eventTypeSetting?.expand.user?.email,
+              host: true,
+            },
+            {
+              name: responses.name,
+              email: responses.email,
+              host: false,
+            },
+          ],
+          startTime: slot?.utcTime,
+          endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
+          status: isRescheduling ? "rescheduled" : "confirmed",
+          recurring: false,
+          title: eventTypeSetting?.settings?.title,
+          description: eventTypeSetting?.settings?.description,
+          location: eventTypeSetting?.settings?.location,
+          duration: incrementStep,
+        })
+          .then((fulfilled) => {
+            if (fulfilled) {
+              if (onSuccess) {
+                onSuccess(fulfilled);
+              }
+            }
+          })
+          .catch((error) => {
+            if (onError) {
+              onError(error);
+            }
+          });
+      }
     }
   };
 
@@ -408,7 +398,9 @@ export const BookingCalendar = ({
           </CenterRow>
 
           <Text color="#A3A3A3" fontSize={14}>
-            {availability?.expand?.user?.name}
+            {isRoundRobin
+              ? eventTypeSetting?.expand?.event_type?.expand?.team?.name
+              : availability?.expand?.user?.name}
           </Text>
           <Text fontSize={20}>{eventTypeSetting?.settings?.title}</Text>
           <CenterColumn gap={16}>
@@ -472,7 +464,7 @@ export const BookingCalendar = ({
                     />
                   </Text>
                   <Text variant="light">
-                    {formatToTimeZone(slot.toISOString(), timezone)}
+                    {formatToTimeZone(slot?.utcTime?.toISOString(), timezone)}
                   </Text>
                 </CenterRow>
               </>
@@ -556,7 +548,9 @@ export const BookingCalendar = ({
                 ...(bookingToBeRescheduled?.responses ?? {}),
               }}
               onSubmit={onSubmit}
-              isLoading={isLoading || isReschedulingLoading}
+              isLoading={
+                isLoading || isReschedulingLoading || creatingRoundRobinBooking
+              }
             />
           </Flex>
         ) : (
@@ -633,12 +627,12 @@ export const BookingCalendar = ({
                         <CenterRow key={index} width="100%" gap={"8px"}>
                           <TimeSlot
                             bg={
-                              time.utcTime === slot
+                              time.utcTime === slot?.utcTime
                                 ? "lightGray"
                                 : "transparent"
                             }
                             onClick={() => {
-                              setSlot(time.utcTime);
+                              setSlot(time);
                               // check if all question are answered if not open the form
                               if (isAllAnswered) {
                                 setShowSubmitButton(true);
@@ -647,31 +641,38 @@ export const BookingCalendar = ({
                               }
                             }}
                             key={time.formattedTime}
-                            selected={time.utcTime === slot}
+                            selected={time.utcTime === slot?.utcTime}
                           >
                             <Text variant="light">
                               {formatDisplayTime(time)}
                             </Text>
                           </TimeSlot>
-                          {showSubmitButton && time.utcTime === slot && (
-                            <Button
-                              flexGrow={1}
-                              bg="dayHoverBg"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onSubmit(responses!);
-                              }}
-                              disabled={isLoading || isReschedulingLoading}
-                            >
-                              <Text color="dayColor" variant="light">
-                                {isLoading || isReschedulingLoading ? (
-                                  <LoadingDots />
-                                ) : (
-                                  "Book"
-                                )}
-                              </Text>
-                            </Button>
-                          )}
+                          {showSubmitButton &&
+                            time.utcTime === slot?.utcTime && (
+                              <Button
+                                flexGrow={1}
+                                bg="dayHoverBg"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSubmit(responses!);
+                                }}
+                                disabled={
+                                  isLoading ||
+                                  isReschedulingLoading ||
+                                  creatingRoundRobinBooking
+                                }
+                              >
+                                <Text color="dayColor" variant="light">
+                                  {isLoading ||
+                                  isReschedulingLoading ||
+                                  creatingRoundRobinBooking ? (
+                                    <LoadingDots />
+                                  ) : (
+                                    "Book"
+                                  )}
+                                </Text>
+                              </Button>
+                            )}
                         </CenterRow>
                       ))
                     ) : (

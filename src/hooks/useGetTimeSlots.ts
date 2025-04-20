@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
-import { Availability, Booking, EventTypeSettings } from "../types";
+import { Availability, Booking, EventTypeSettings, Slot } from "../types";
 import { setHours, setMinutes } from "date-fns";
 import { formatToTimeZone } from "../utils";
 
@@ -19,6 +19,28 @@ export const useGetTimeSlots = ({
   bookings,
   incrementStep,
 }: Props) => {
+  function filterSlotsAndAddUsers(slots: Array<Slot>): Array<Slot> {
+    const slotMap = new Map();
+
+    for (const slot of slots) {
+      const key = slot.formattedTime;
+      if (!slotMap.has(key)) {
+        slot["users"] = [];
+        if (slot.user) {
+          slot["users"].push(slot.user);
+        }
+        slotMap.set(key, slot);
+        delete slot["user"];
+      } else {
+        const existingSlot = slotMap.get(key);
+        existingSlot["users"].push(slot.user);
+        slotMap.set(key, existingSlot);
+      }
+    }
+
+    return Array.from(slotMap.values());
+  }
+
   const getTimeSlots = useCallback(
     (selectedDate: Date, userTimezone: string = "UTC") => {
       const incrementTime = Number(incrementStep) * 60 * 1000;
@@ -53,9 +75,16 @@ export const useGetTimeSlots = ({
       if (!availabilityForDay || availabilityForDay.length === 0) return [];
 
       // Generate time slots based on availability
-      const slots: { formattedTime: string; utcTime: Date }[] = [];
+      const slots: {
+        formattedTime: string;
+        utcTime: Date;
+        user: string | undefined;
+        users?: string[];
+      }[] = [];
+      // let users = new Set<string>();
 
       availabilityForDay.forEach((slot) => {
+        console.log(slot);
         const [startHour, startMinute] = slot.start.split(":").map(Number);
         const [endHour, endMinute] = slot.end.split(":").map(Number);
         // Convert start time to UTC
@@ -73,6 +102,7 @@ export const useGetTimeSlots = ({
           new Date(endTime).getTime() - bufferAfter * 60 * 1000
         ).toISOString();
         let currentTime = startTime;
+
         while (currentTime < adjustedEndTime) {
           // Convert to user timezone for display
           const formattedTime = formatToTimeZone(
@@ -80,25 +110,23 @@ export const useGetTimeSlots = ({
             timezone,
             "h:mmaaa"
           ); // e.g., "10:30am"
-          // skip already booked slots
-          const slotExist = slots.find(
-            (s) => s.formattedTime === formattedTime
-          );
-          // const noEnoughTime = new Date(currentTime) + incrementStep
           const timeGap =
             new Date(adjustedEndTime).getTime() -
             new Date(currentTime).getTime();
-          if (!slotExist && timeGap >= incrementTime) {
-            slots.push({ formattedTime, utcTime: new Date(currentTime) });
+          if (timeGap >= incrementTime) {
+            slots.push({
+              formattedTime,
+              utcTime: new Date(currentTime),
+              user: slot.user,
+            });
           }
-
           // Increment time
           currentTime = new Date(
             new Date(currentTime).getTime() + incrementTime
           ).toISOString();
         }
       });
-      return slots
+      const filteredSlots = slots
         .sort((a, b) => (a.utcTime > b.utcTime ? 1 : -1))
         .filter((slot) => {
           const slotStart = new Date(slot.utcTime);
@@ -125,6 +153,10 @@ export const useGetTimeSlots = ({
 
           return !isOverlapping;
         });
+
+      // filter repeated slots and return
+      const newFormatted = filterSlotsAndAddUsers(filteredSlots);
+      return newFormatted;
     },
     [
       availability,

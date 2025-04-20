@@ -62,6 +62,7 @@ export interface EventType {
   updated: string;
   expand: {
     members: Array<MembersType>;
+    team: Team;
   };
   members?: Array<MembersType>;
   event_type_settings_via_event_type: EventTypeSettings[];
@@ -71,7 +72,10 @@ export interface EventType {
   bookingQuestions: Array<any>;
   defaultDuration?: number | string;
   organization: string;
+  type: EventTypeType;
 }
+
+export type EventTypeType = "managed" | "round_robin" | "recurring";
 
 export type User = {
   collectionId: string;
@@ -232,6 +236,7 @@ export type Availability = {
   availability: {
     start: string;
     end: string;
+    user?: string;
   }[][];
   timezone: string;
   isDefault: boolean;
@@ -244,6 +249,7 @@ export type Availability = {
   expand: {
     user: User;
   };
+  user: string;
 };
 
 export type DateOverrides = {
@@ -318,4 +324,11 @@ export type Guest = {
   email: string;
   name: string;
   host: boolean;
+};
+
+export type Slot = {
+  formattedTime: string;
+  utcTime: Date;
+  user: string | undefined;
+  users?: string[];
 };

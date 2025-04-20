@@ -1,4 +1,4 @@
-import { Availability, Booking, EventTypeSettings } from "../types";
+import { Availability, Booking, EventTypeSettings, Slot } from "../types";
 type Props = {
     availability: Partial<Availability> | undefined;
     eventTypeSetting: EventTypeSettings | undefined;
@@ -7,9 +7,6 @@ type Props = {
     bookings: Booking[] | undefined;
 };
 export declare const useGetTimeSlots: ({ availability, eventTypeSetting, timezone, bookings, incrementStep, }: Props) => {
-    getTimeSlots: (selectedDate: Date, userTimezone?: string) => {
-        formattedTime: string;
-        utcTime: Date;
-    }[];
+    getTimeSlots: (selectedDate: Date, userTimezone?: string) => Slot[];
 };
 export {};
