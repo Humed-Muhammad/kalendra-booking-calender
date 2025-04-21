@@ -65,11 +65,8 @@ export const useGetTimeSlots = ({
 
       let availabilityForDay = availability.availability?.[dayOfWeek];
       // Add the date override to the availabilityForDay
-      if (availabilityForDay && dateOverride) {
-        availabilityForDay = [
-          ...availabilityForDay,
-          ...dateOverride.availability,
-        ];
+      if (dateOverride?.availability) {
+        availabilityForDay = dateOverride.availability;
       }
       // }
       if (!availabilityForDay || availabilityForDay.length === 0) return [];

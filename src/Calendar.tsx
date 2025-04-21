@@ -1,4 +1,5 @@
 import {
+  browserTimezone,
   collectionNames,
   createRoundRobin,
   db,
@@ -114,6 +115,10 @@ export const BookingCalendar = ({
   // Function to check if a date has availability
   const hasAvailability = useCallback(
     (date: Date) => {
+      const slots = getTimeSlots(date, browserTimezone);
+      if (!slots.length) {
+        return false;
+      }
       if (date.getDate() < new Date().getDate()) {
         return false;
       }
@@ -329,6 +334,15 @@ export const BookingCalendar = ({
     },
     [activeTab]
   );
+
+  // Generate time slots
+  useEffect(() => {
+    setAvailableTimeSlots([]);
+    if (date) {
+      const slots = getTimeSlots(date, browserTimezone);
+      setAvailableTimeSlots(slots);
+    }
+  }, [getTimeSlots, date]);
 
   if (isFetching) {
     return (
@@ -565,17 +579,7 @@ export const BookingCalendar = ({
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(date) => {
-                  setAvailableTimeSlots([]);
-                  if (date) {
-                    const slots = getTimeSlots(
-                      date,
-                      Intl.DateTimeFormat().resolvedOptions().timeZone
-                    );
-                    setAvailableTimeSlots(slots);
-                  }
-                  setDate(date);
-                }}
+                onSelect={setDate}
                 disabled={(date) => !hasAvailability(date)}
               />
             </CenterColumn>
