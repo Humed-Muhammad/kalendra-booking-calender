@@ -121,7 +121,7 @@ export const BookingCalendar = ({
       if (!slots.length) {
         return false;
       }
-      if (date.getDate() < new Date().getDate()) {
+      if (date < new Date()) {
         return false;
       }
 
@@ -400,6 +400,7 @@ export const BookingCalendar = ({
           <CenterRow gap={"8px"}>
             <Avatar
               src={
+                !isRoundRobin &&
                 eventTypeSetting?.expand?.user?.id &&
                 eventTypeSetting?.expand?.user?.avatar
                   ? getImage({
@@ -410,7 +411,14 @@ export const BookingCalendar = ({
                     })
                   : ""
               }
-              fallback={eventTypeSetting?.expand?.user?.name?.substring(0, 2)}
+              fallback={
+                isRoundRobin
+                  ? eventTypeSetting?.expand?.event_type?.expand?.team?.name?.substring(
+                      0,
+                      2
+                    )
+                  : eventTypeSetting?.expand?.user?.name?.substring(0, 2)
+              }
               alt={eventTypeSetting?.expand?.user?.name}
             />
           </CenterRow>
