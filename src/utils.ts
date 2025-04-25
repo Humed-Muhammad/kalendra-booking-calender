@@ -1,8 +1,6 @@
 import { format, toZonedTime } from "date-fns-tz";
-import PocketBase from "pocketbase";
 import { Booking } from "./types";
-
-export const pbUrl = "http://127.0.0.1:8090";
+import Pocketbase from "pocketbase";
 
 export const formatSlotMinutes = (minutes: number) => {
   if (minutes >= 60) {
@@ -37,10 +35,12 @@ export const getImage = ({
   imageName,
   collectionName,
   recordId,
+  pbUrl,
 }: {
   imageName: string;
   collectionName: string;
   recordId: string;
+  pbUrl: string;
 }) => {
   return `${pbUrl}/api/files/${collectionName}/${recordId}/${imageName}`;
 };
@@ -58,7 +58,6 @@ export const collectionNames = {
   webhooks: "webhooks",
   api_keys: "api_keys",
 };
-export const db = new PocketBase(pbUrl);
 
 export const statusColors = {
   success: {
@@ -153,20 +152,22 @@ type CreateRoundRobinProps = {
   setCreatingRoundRobinBooking: (value: boolean) => void;
   onSuccess?: (response: Booking) => void;
   onError?: (error: any) => void;
+  db: Pocketbase;
 };
 export const createRoundRobin = async ({
   body,
   setCreatingRoundRobinBooking,
   onError,
   onSuccess,
+  db,
 }: CreateRoundRobinProps) => {
   try {
     setCreatingRoundRobinBooking(true);
-    const response = await db.send<Booking>("/round-robin", {
+    const response = await db?.send<Booking>("/round-robin", {
       method: "POST",
       body,
     });
-    onSuccess?.(response);
+    onSuccess?.(response!);
     return response;
   } catch (error) {
     onError?.(error);

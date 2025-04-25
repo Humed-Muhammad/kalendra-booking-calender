@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import { CSSProperties } from "react";
 type Props = {
     value: string;
     onChange: (value: string) => void;
@@ -13,5 +13,5 @@ type Props = {
     disabled?: boolean;
     showBorder?: boolean;
 };
-export declare const SearchableSelector: ({ value, onChange, options, label, placeholder, showSuffix, selectorStyle, disabled, showBorder }: Props) => JSX.Element;
+export declare const SearchableSelector: ({ value, onChange, options, label, placeholder, showSuffix, selectorStyle, disabled, showBorder, }: Props) => JSX.Element;
 export {};

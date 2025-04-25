@@ -2,7 +2,6 @@ import {
   browserTimezone,
   collectionNames,
   createRoundRobin,
-  db,
   formatToTimeZone,
   minimumNoticeTypeValue,
 } from "./utils";
@@ -13,6 +12,7 @@ import { CalendarIcon, Globe, Link, TimerIcon } from "lucide-react";
 import {
   CSSProperties,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -51,6 +51,7 @@ import { Avatar } from "./Core/Avatar/index";
 import { useGetTimeSlots } from "./hooks/useGetTimeSlots";
 import { EventTypeError } from "./NoEventFoundError";
 import { KalendraLoader } from "./icons/KalendraLoader";
+import { KalendraContext } from "./context/context";
 
 type Props = {
   availability: Partial<Availability>;
@@ -84,6 +85,7 @@ export const BookingCalendar = ({
   onError,
   onSuccess,
 }: Props) => {
+  const { db, pbUrl } = useContext(KalendraContext);
   const [creatingRoundRobinBooking, setCreatingRoundRobinBooking] =
     useState(false);
   const isRescheduling = useMemo(
@@ -167,7 +169,7 @@ export const BookingCalendar = ({
       }
       return Number(availability.availability?.[dayOfWeek]?.length) > 0;
     },
-    [availability, eventTypeSetting]
+    [availability, eventTypeSetting, getTimeSlots]
   );
 
   const [activeTab, setActiveTab] = useState("12h");
@@ -236,7 +238,7 @@ export const BookingCalendar = ({
     if (isRescheduling) {
       setIsReschedulingLoading(true);
       await db
-        .send<Booking>("/reschedule-booking", {
+        ?.send<Booking>("/reschedule-booking", {
           method: "PATCH",
           body,
         })
@@ -252,6 +254,7 @@ export const BookingCalendar = ({
           setCreatingRoundRobinBooking,
           onError,
           onSuccess,
+          db: db!,
         });
       } else {
         mutate({
@@ -403,6 +406,7 @@ export const BookingCalendar = ({
                       collectionName: collectionNames.users,
                       recordId: eventTypeSetting?.expand?.user?.id,
                       imageName: eventTypeSetting?.expand?.user?.avatar,
+                      pbUrl: String(pbUrl),
                     })
                   : ""
               }

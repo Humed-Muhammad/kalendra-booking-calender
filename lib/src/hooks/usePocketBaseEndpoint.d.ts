@@ -1,4 +1,4 @@
-import { SendOptions } from 'pocketbase';
+import { SendOptions } from "pocketbase";
 type Props = {
     url: string;
     options: SendOptions;

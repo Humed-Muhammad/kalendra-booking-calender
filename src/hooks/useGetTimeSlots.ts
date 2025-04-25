@@ -43,6 +43,7 @@ export const useGetTimeSlots = ({
 
   const getTimeSlots = useCallback(
     (selectedDate: Date, userTimezone: string = "UTC") => {
+      if (!incrementStep) return [];
       const incrementTime = Number(incrementStep) * 60 * 1000;
       if (!availability) return [];
       const formattedDate = formatInTimeZone(
@@ -81,7 +82,6 @@ export const useGetTimeSlots = ({
       // let users = new Set<string>();
 
       availabilityForDay.forEach((slot) => {
-        console.log(slot);
         const [startHour, startMinute] = slot.start.split(":").map(Number);
         const [endHour, endMinute] = slot.end.split(":").map(Number);
         // Convert start time to UTC

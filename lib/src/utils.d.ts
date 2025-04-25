@@ -1,12 +1,12 @@
-import PocketBase from "pocketbase";
 import { Booking } from "./types";
-export declare const pbUrl = "http://127.0.0.1:8090";
+import Pocketbase from "pocketbase";
 export declare const formatSlotMinutes: (minutes: number) => string;
 export declare function getGMTOffset(timezone: string): string;
-export declare const getImage: ({ imageName, collectionName, recordId, }: {
+export declare const getImage: ({ imageName, collectionName, recordId, pbUrl, }: {
     imageName: string;
     collectionName: string;
     recordId: string;
+    pbUrl: string;
 }) => string;
 export declare const collectionNames: {
     organizations: string;
@@ -21,7 +21,6 @@ export declare const collectionNames: {
     webhooks: string;
     api_keys: string;
 };
-export declare const db: PocketBase;
 export declare const statusColors: {
     success: {
         bg: string;
@@ -65,6 +64,7 @@ type CreateRoundRobinProps = {
     setCreatingRoundRobinBooking: (value: boolean) => void;
     onSuccess?: (response: Booking) => void;
     onError?: (error: any) => void;
+    db: Pocketbase;
 };
-export declare const createRoundRobin: ({ body, setCreatingRoundRobinBooking, onError, onSuccess, }: CreateRoundRobinProps) => Promise<Booking>;
+export declare const createRoundRobin: ({ body, setCreatingRoundRobinBooking, onError, onSuccess, db, }: CreateRoundRobinProps) => Promise<Booking>;
 export {};

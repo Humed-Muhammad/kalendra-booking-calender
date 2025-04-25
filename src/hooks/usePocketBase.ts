@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { db, flattenPocketBaseData } from "../utils";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { flattenPocketBaseData } from "../utils";
 import { RecordFullListOptions } from "pocketbase";
+import { KalendraContext } from "../context/context";
 
 type PocketBaseQuery<T = unknown, K = T> = {
   collectionName: string;
@@ -36,6 +37,7 @@ export const usePocketBaseQuery = <T, K = T>({
   paginated,
   transformData,
 }: PocketBaseQuery<T, K>) => {
+  const { db } = useContext(KalendraContext);
   const [data, setData] = useState<unknown>();
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -46,22 +48,22 @@ export const usePocketBaseQuery = <T, K = T>({
     try {
       if (single) {
         const response = await db
-          .collection(collectionName)
+          ?.collection(collectionName)
           .getFirstListItem<T>(options?.filter as string, options);
         setData(response);
       } else if (id) {
         const response = await db
-          .collection(collectionName)
+          ?.collection(collectionName)
           .getOne<T>(id, options);
         setData(response);
       } else if (paginated) {
         const response = await db
-          .collection(collectionName)
+          ?.collection(collectionName)
           .getList<T>(options?.page, options?.perPage, options);
         setData(response);
       } else {
         const response = await db
-          .collection(collectionName)
+          ?.collection(collectionName)
           .getFullList(options);
         setData(response);
       }
@@ -72,7 +74,7 @@ export const usePocketBaseQuery = <T, K = T>({
     } finally {
       setIsLoading(false);
     }
-  }, [collectionName, JSON.stringify(options), skip, id]);
+  }, [collectionName, JSON.stringify(options), skip, id, db]);
 
   useEffect(() => {
     if (skip) {
@@ -107,6 +109,7 @@ interface PocketBaseMutation<T> extends Partial<PocketBaseQuery> {
 export const usePocketBaseMutation = <T>(
   payload?: Partial<PocketBaseMutation<T>>
 ) => {
+  const { db } = useContext(KalendraContext);
   const collectionName = payload?.collectionName;
   const update = payload?.update;
   const options = payload?.options;
@@ -136,7 +139,9 @@ export const usePocketBaseMutation = <T>(
         setSuccess(false);
         if (update || mutateOptions?.update) {
           response = await db
-            .collection(String(collectionName ?? mutateOptions?.collectionName))
+            ?.collection(
+              String(collectionName ?? mutateOptions?.collectionName)
+            )
             .update<T>(
               data?.id || mutateOptions?.id || payload?.id,
               data,
@@ -145,13 +150,15 @@ export const usePocketBaseMutation = <T>(
         } else {
           delete data?.id;
           response = await db
-            .collection(String(collectionName ?? mutateOptions?.collectionName))
+            ?.collection(
+              String(collectionName ?? mutateOptions?.collectionName)
+            )
             .create<T>(data, options ?? mutateOptions?.options);
         }
-        setData(response);
+        setData(response!);
         setSuccess(true);
-        payload?.onSuccess?.(response);
-        return response;
+        payload?.onSuccess?.(response!);
+        return response!;
       } catch (err: any) {
         setError(
           err instanceof Error ? err : new Error("Failed to fetch data")
@@ -163,7 +170,7 @@ export const usePocketBaseMutation = <T>(
         setIsLoading(false);
       }
     },
-    [JSON.stringify(payload)]
+    [JSON.stringify(payload), db]
   );
 
   return {
