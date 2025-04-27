@@ -112,7 +112,7 @@ export const flattenPocketBaseData = <T>(
     if (result.expand) {
       Object.entries(result.expand).forEach(([key, value]) => {
         result[key] = Array.isArray(value)
-          ? value.map((v) => flatten(v))
+          ? value?.map((v) => flatten(v))
           : value && typeof value === "object"
           ? flatten(value)
           : value;
@@ -123,7 +123,7 @@ export const flattenPocketBaseData = <T>(
     return result;
   };
   return Array.isArray(data)
-    ? data.map((item) => flatten(item))
+    ? data?.map((item) => flatten(item))
     : flatten(data);
 };
 

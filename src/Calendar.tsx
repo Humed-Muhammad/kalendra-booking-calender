@@ -320,7 +320,7 @@ export const BookingCalendar = ({
 
       if (activeTab === "24h") {
         const [hourMin, period] = time.formattedTime.split(/([ap]m)$/);
-        const [hour, minute] = hourMin.split(":").map(Number);
+        const [hour, minute] = hourMin.split(":")?.map(Number);
         let hour24 = hour;
 
         if (period === "pm" && hour !== 12) {
@@ -639,7 +639,7 @@ export const BookingCalendar = ({
                 <TabsContent>
                   <TimeSlotContainer>
                     {availableTimeSlots.length > 0 ? (
-                      availableTimeSlots.map((time, index) => (
+                      availableTimeSlots?.map((time, index) => (
                         <CenterRow key={index} width="100%" gap={"8px"}>
                           <TimeSlot
                             bg={

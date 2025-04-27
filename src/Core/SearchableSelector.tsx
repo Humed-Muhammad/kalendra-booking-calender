@@ -123,7 +123,7 @@ export const SearchableSelector = ({
           </Box>
           <CenterColumn px={1}>
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
+              filteredOptions?.map((option) => (
                 <Box
                   key={option.value}
                   padding={2}

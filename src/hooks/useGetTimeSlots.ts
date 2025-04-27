@@ -82,8 +82,8 @@ export const useGetTimeSlots = ({
       // let users = new Set<string>();
 
       availabilityForDay.forEach((slot) => {
-        const [startHour, startMinute] = slot.start.split(":").map(Number);
-        const [endHour, endMinute] = slot.end.split(":").map(Number);
+        const [startHour, startMinute] = slot.start.split(":")?.map(Number);
+        const [endHour, endMinute] = slot.end.split(":")?.map(Number);
         // Convert start time to UTC
 
         const startTime = setHours(

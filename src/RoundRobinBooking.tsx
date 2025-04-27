@@ -24,7 +24,7 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
       },
       skip: !eventType?.id,
     });
-  const userFilter = membersUsers.map((id) => `user="${id}"`).join(" || ");
+  const userFilter = membersUsers?.map((id) => `user="${id}"`).join(" || ");
   const { data: availabilities, isLoading } = usePocketBaseQuery<
     Array<Availability>
   >({
@@ -54,10 +54,10 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
       ?.filter((av) => av.isDefault)
       .reduce(
         (acc: Accumulator, curr) => {
-          curr.availability.map((a, index) => {
+          curr?.availability?.map((a, index) => {
             if (a.length) {
               // @ts-ignore
-              const afterUserAdd = a.map((a) => ({
+              const afterUserAdd = a?.map((a) => ({
                 ...a,
                 user: curr.user,
               }));
@@ -67,8 +67,8 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
               ];
             }
           });
-          curr.dateOverrides.map((a) => {
-            const afterUserAdd = a.availability.map((a) => ({
+          curr.dateOverrides?.map((a) => {
+            const afterUserAdd = a.availability?.map((a) => ({
               ...a,
               user: curr.user,
             }));

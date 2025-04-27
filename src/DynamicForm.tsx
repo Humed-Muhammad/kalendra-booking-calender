@@ -91,7 +91,7 @@ export const DynamicForm = ({
       {({ values, handleChange, setFieldValue, errors }) => {
         return (
           <Form style={{ height: "440px", overflowY: "scroll" }}>
-            {fields.map((field) => {
+            {fields?.map((field) => {
               const { id, label, type, options, identifier, placeholder } =
                 field;
               return (
@@ -122,7 +122,7 @@ export const DynamicForm = ({
                       )}
                       {type === "checkbox" && options && (
                         <div>
-                          {options.map((option: any) => (
+                          {options?.map((option: any) => (
                             <CenterColumn key={option.id}>
                               <CenterRow gap={"8px"} bg="background">
                                 <Checkbox
@@ -149,7 +149,7 @@ export const DynamicForm = ({
                       )}
                       {type === "radio" && options && (
                         <div>
-                          {options.map((option: any) => (
+                          {options?.map((option: any) => (
                             <CenterColumn key={option.id}>
                               <CenterRow gap={"8px"}>
                                 <Radio
