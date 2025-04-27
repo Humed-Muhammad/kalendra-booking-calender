@@ -6,8 +6,6 @@ import { BookingProps } from "./types/type";
 import { NormalBooking } from "./NormalBooking";
 import { KalendraContext, KalendraProvider } from "./context/context";
 import { useContext, useEffect } from "react";
-import { KalendraLoader } from "./icons/KalendraLoader";
-import { Container } from "./Core/index";
 
 interface Props extends BookingProps {
   calenderUrl: string;
@@ -22,19 +20,11 @@ const BookingCalendar = (props: Props) => {
     },
   });
 
-  const { setPbUrl, pbUrl } = useContext(KalendraContext);
+  const { setPbUrl } = useContext(KalendraContext);
 
   useEffect(() => {
     setPbUrl?.(props.calenderUrl);
   }, [props.calenderUrl]);
-
-  if (!pbUrl) {
-    return (
-      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
-        {props.LoadingIndicator ? props.LoadingIndicator : <KalendraLoader />}
-      </Container>
-    );
-  }
 
   if (
     eventType?.type === "round_robin" &&
