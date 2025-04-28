@@ -8,6 +8,7 @@ import { BookingCalendar } from "./Calendar";
 
 interface Props extends BookingProps {
   eventType: EventType;
+  isLoadingRootEventType: boolean;
 }
 
 export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {

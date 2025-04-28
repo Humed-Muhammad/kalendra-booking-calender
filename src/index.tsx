@@ -11,7 +11,11 @@ interface Props extends BookingProps {
   calenderUrl: string;
 }
 const BookingCalendar = (props: Props) => {
-  const { data: eventType } = usePocketBaseQuery<EventType>({
+  const {
+    data: eventType,
+    isError,
+    isLoading,
+  } = usePocketBaseQuery<EventType>({
     collectionName: collectionNames.event_types,
     id: props.eventTypeId as string,
     skip: !props.eventTypeId,
@@ -31,9 +35,22 @@ const BookingCalendar = (props: Props) => {
     !props.kalendra_user_id &&
     !props.bookingToBeRescheduledId
   ) {
-    return <RoundRobinBooking eventType={eventType} {...props} />;
+    return (
+      <RoundRobinBooking
+        eventType={eventType}
+        {...props}
+        isError={isError}
+        isLoadingRootEventType={isLoading}
+      />
+    );
   }
-  return <NormalBooking {...props} />;
+  return (
+    <NormalBooking
+      {...props}
+      isError={isError}
+      isLoadingRootEventType={isLoading}
+    />
+  );
 };
 
 export const KalendraCalendar = (props: Props) => {

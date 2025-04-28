@@ -16,6 +16,7 @@ type Props = {
     LoadingIndicator?: JSX.Element | undefined;
     NoEventError?: JSX.Element | undefined;
     isRoundRobin?: boolean;
+    isError?: boolean;
 };
-export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, LoadingIndicator, NoEventError, isRoundRobin, onError, onSuccess, }: Props) => JSX.Element;
+export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, LoadingIndicator, NoEventError, isRoundRobin, isError, onError, onSuccess, }: Props) => JSX.Element;
 export {};

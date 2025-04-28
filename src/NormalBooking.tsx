@@ -6,7 +6,10 @@ import { collectionNames } from "./utils";
 import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
 import { BookingCalendar } from "./Calendar";
 
-export const NormalBooking = (props: BookingProps) => {
+interface Props extends BookingProps {
+  isLoadingRootEventType: boolean;
+}
+export const NormalBooking = (props: Props) => {
   const { kalendra_user_id, eventTypeId, bookingToBeRescheduledId } = props;
   const {
     data: bookingToBeRescheduled,

@@ -1,3 +1,7 @@
 /// <reference types="react" />
 import type { BookingProps } from "./types/type";
-export declare const NormalBooking: (props: BookingProps) => JSX.Element;
+interface Props extends BookingProps {
+    isLoadingRootEventType: boolean;
+}
+export declare const NormalBooking: (props: Props) => JSX.Element;
+export {};

@@ -68,6 +68,7 @@ type Props = {
   LoadingIndicator?: JSX.Element | undefined;
   NoEventError?: JSX.Element | undefined;
   isRoundRobin?: boolean;
+  isError?: boolean;
 };
 export const BookingCalendar = ({
   availability,
@@ -82,6 +83,7 @@ export const BookingCalendar = ({
   LoadingIndicator,
   NoEventError,
   isRoundRobin,
+  isError,
   onError,
   onSuccess,
 }: Props) => {
@@ -355,8 +357,7 @@ export const BookingCalendar = ({
     );
   }
 
-  if ((!eventTypeSetting || !availability) && !isFetching)
-    return NoEventError ? NoEventError : <EventTypeError />;
+  if (isError) return NoEventError ? NoEventError : <EventTypeError />;
 
   return (
     <ThemeProvider theme={theme ?? darkTheme}>

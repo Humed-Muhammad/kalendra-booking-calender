@@ -38,4 +38,5 @@ export interface BookingProps {
   bookingToBeRescheduledId?: string;
   LoadingIndicator?: JSX.Element;
   NoEventError?: JSX.Element;
+  isError?: boolean;
 }
