@@ -209,7 +209,28 @@ export const BookingCalendar = ({
     collectionName: collectionNames.bookings,
   });
   // replace with success component later
-
+  const bookingTitle = useCallback(
+    (userResponses: Record<string, any>) => {
+      const eventTitle = eventTypeSetting?.expand?.event_type?.title;
+      const attendees = [
+        {
+          name: eventTypeSetting?.expand.user?.name,
+          email: eventTypeSetting?.expand.user?.email,
+          host: true,
+        },
+        {
+          name: userResponses?.name,
+          email: userResponses?.email,
+          host: false,
+        },
+      ];
+      const joinedAttendees = attendees
+        .map((response) => response.name)
+        .join(", ");
+      return `${eventTitle} between ${joinedAttendees}`;
+    },
+    [eventTypeSetting]
+  );
   const onSubmit = async (responses: Record<string, any>) => {
     const body = {
       bookingId: bookingToBeRescheduled?.id,
@@ -232,7 +253,7 @@ export const BookingCalendar = ({
       endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
       status: isRescheduling ? "rescheduled" : "confirmed",
       recurring: false,
-      title: eventTypeSetting?.settings?.title,
+      title: bookingTitle(responses),
       description: eventTypeSetting?.settings?.description,
       location: eventTypeSetting?.settings?.location,
       duration: incrementStep,
@@ -279,7 +300,7 @@ export const BookingCalendar = ({
           endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
           status: isRescheduling ? "rescheduled" : "confirmed",
           recurring: false,
-          title: eventTypeSetting?.settings?.title,
+          title: bookingTitle(responses),
           description: eventTypeSetting?.settings?.description,
           location: eventTypeSetting?.settings?.location,
           duration: incrementStep,
