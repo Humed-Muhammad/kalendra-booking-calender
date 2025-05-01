@@ -13,7 +13,7 @@ interface Props extends BookingProps {
   calenderUrl: string;
 }
 const BookingCalendar = (props: Props) => {
-  const [loadingData, setLoadingData] = useState(true);
+  const [loadingData, setLoadingData] = useState(false);
   const {
     data: eventType,
     isError,
