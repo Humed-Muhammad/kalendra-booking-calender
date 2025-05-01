@@ -5,7 +5,7 @@ import { RoundRobinBooking } from "./RoundRobinBooking";
 import { BookingProps } from "./types/type";
 import { NormalBooking } from "./NormalBooking";
 import { KalendraContext, KalendraProvider } from "./context/context";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { Container } from "./Core/index";
 import { KalendraLoader } from "./icons/KalendraLoader";
 
@@ -13,7 +13,6 @@ interface Props extends BookingProps {
   calenderUrl: string;
 }
 const BookingCalendar = (props: Props) => {
-  const [loadingData, setLoadingData] = useState(false);
   const {
     data: eventType,
     isError,
@@ -33,7 +32,7 @@ const BookingCalendar = (props: Props) => {
     setPbUrl?.(props.calenderUrl);
   }, [props.calenderUrl]);
 
-  if (isLoading || loadingData) {
+  if (isLoading) {
     return (
       <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
         {props.LoadingIndicator ? props.LoadingIndicator : <KalendraLoader />}
@@ -52,7 +51,6 @@ const BookingCalendar = (props: Props) => {
         {...props}
         isError={isError}
         isLoadingRootEventType={isLoading}
-        setLoadingData={setLoadingData}
       />
     );
   }
@@ -61,7 +59,6 @@ const BookingCalendar = (props: Props) => {
       {...props}
       isError={isError}
       isLoadingRootEventType={isLoading}
-      setLoadingData={setLoadingData}
     />
   );
 };

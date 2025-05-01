@@ -1,22 +1,19 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Availability, Booking, EventType, EventTypeSettings } from "./types";
 import { usePocketBaseQuery } from "./hooks/usePocketBase";
 import { collectionNames } from "./utils";
 import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
 import { Accumulator, BookingProps } from "./types/type";
 import { BookingCalendar } from "./Calendar";
+import { Container } from "./Core/index";
+import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
   eventType: EventType;
   isLoadingRootEventType: boolean;
-  setLoadingData: Dispatch<SetStateAction<boolean>>;
 }
 
-export const RoundRobinBooking = ({
-  eventType,
-  setLoadingData,
-  ...rest
-}: Props) => {
+export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const membersUsers = useMemo(() => {
     return eventType?.expand?.members?.map((member) => member.user);
   }, [eventType]);
@@ -106,11 +103,13 @@ export const RoundRobinBooking = ({
     [isFetchingEventTypeSettings, isFetchingBooking]
   );
 
-  useEffect(() => {
-    if (!isFetching) {
-      setLoadingData(false);
-    }
-  }, [isFetching]);
+  if (isFetching || rest.isLoadingRootEventType) {
+    return (
+      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
+        {rest.LoadingIndicator ? rest.LoadingIndicator : <KalendraLoader />}
+      </Container>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center p-3">

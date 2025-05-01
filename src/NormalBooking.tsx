@@ -1,14 +1,15 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { usePocketBaseQuery } from "./hooks/usePocketBase";
 import type { Availability, Booking, EventTypeSettings } from "./types";
 import type { BookingProps } from "./types/type";
 import { collectionNames } from "./utils";
 import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
 import { BookingCalendar } from "./Calendar";
+import { Container } from "./Core/index";
+import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
   isLoadingRootEventType: boolean;
-  setLoadingData: Dispatch<SetStateAction<boolean>>;
 }
 export const NormalBooking = (props: Props) => {
   const { kalendra_user_id, eventTypeId, bookingToBeRescheduledId } = props;
@@ -87,11 +88,14 @@ export const NormalBooking = (props: Props) => {
     [isFetchingBooking, isFetchingEventSettings, isFetchingBookingToReschedule]
   );
 
-  useEffect(() => {
-    if (!isFetching) {
-      props.setLoadingData(false);
-    }
-  }, [isFetching]);
+  if (isFetching || props.isLoadingRootEventType) {
+    return (
+      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
+        {props.LoadingIndicator ? props.LoadingIndicator : <KalendraLoader />}
+      </Container>
+    );
+  }
+
   return (
     <BookingCalendar
       eventTypeSetting={eventTypeSetting}
