@@ -388,12 +388,6 @@ export const BookingCalendar = ({
   );
 
   useEffect(() => {
-    if (!date) {
-      setSlot(undefined);
-    }
-  }, [date]);
-
-  useEffect(() => {
     debouncedNavigate(navigateNextMonth && !stopNavigation && !isFetching);
   }, [navigateNextMonth, debouncedNavigate, stopNavigation, isFetching]);
   useEffect(() => {
@@ -534,7 +528,7 @@ export const BookingCalendar = ({
                 </Text>
               </CenterColumn>
             )}
-            {slot && (
+            {slot && date && (
               <>
                 <CenterRow gap={"8px"}>
                   <Text>
