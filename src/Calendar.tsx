@@ -641,7 +641,12 @@ export const BookingCalendar = ({
                 nextRef={nextRef}
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(dateValue) => {
+                  setDate(dateValue);
+                  if (!dateValue) {
+                    setSlot(undefined);
+                  }
+                }}
                 disabled={(date) => {
                   const hasAva = hasAvailability(date);
                   if (hasAva) {
