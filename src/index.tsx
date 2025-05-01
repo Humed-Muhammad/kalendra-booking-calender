@@ -5,14 +5,15 @@ import { RoundRobinBooking } from "./RoundRobinBooking";
 import { BookingProps } from "./types/type";
 import { NormalBooking } from "./NormalBooking";
 import { KalendraContext, KalendraProvider } from "./context/context";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Container } from "./Core/index";
-import { KalendraLoader } from "./icons/KalendraLoader";
+// import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
   calenderUrl: string;
 }
 const BookingCalendar = (props: Props) => {
+  const [initializing, setInitializing] = useState(true);
   const {
     data: eventType,
     isError,
@@ -32,10 +33,16 @@ const BookingCalendar = (props: Props) => {
     setPbUrl?.(props.calenderUrl);
   }, [props.calenderUrl]);
 
-  if (isLoading) {
+  useEffect(() => {
+    setTimeout(() => {
+      setInitializing(false);
+    }, 500);
+  }, []);
+
+  if (isLoading || initializing) {
     return (
       <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
-        {props.LoadingIndicator ? props.LoadingIndicator : <KalendraLoader />}
+        <div />
       </Container>
     );
   }
