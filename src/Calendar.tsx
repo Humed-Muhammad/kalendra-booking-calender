@@ -52,7 +52,7 @@ import { useGetTimeSlots } from "./hooks/useGetTimeSlots";
 import { EventTypeError } from "./NoEventFoundError";
 import { KalendraLoader } from "./icons/KalendraLoader";
 import { KalendraContext } from "./context/context";
-
+import { debounce } from "lodash";
 type Props = {
   availability: Partial<Availability>;
   isFetching: boolean;
@@ -370,6 +370,23 @@ export const BookingCalendar = ({
     }
   }, [getTimeSlots, date]);
 
+  // Navigate to next month if no slots are available on the current month
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const [navigateNextMonth, setNavigateNextMonth] = useState(true);
+  const debouncedNavigate = useCallback(
+    debounce((value: boolean) => {
+      if (value) {
+        if (nextRef.current && navigateNextMonth) {
+          nextRef.current?.click();
+        }
+      }
+    }, 1000),
+    []
+  );
+  useEffect(() => {
+    debouncedNavigate(navigateNextMonth);
+  }, [navigateNextMonth, debouncedNavigate]);
+
   if (isFetching) {
     return (
       <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
@@ -611,10 +628,17 @@ export const BookingCalendar = ({
               justifyContent="center"
             >
               <Calendar
+                nextRef={nextRef}
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                disabled={(date) => !hasAvailability(date)}
+                disabled={(date) => {
+                  const hasAva = hasAvailability(date);
+                  if (hasAva) {
+                    setNavigateNextMonth(false);
+                  }
+                  return !hasAva;
+                }}
               />
             </CenterColumn>
             <Box

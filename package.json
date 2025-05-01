@@ -1,6 +1,6 @@
 {
   "name": "kalendra",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "main": "./lib/src/index.js",
   "module": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
@@ -32,6 +32,7 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20.11.5",
     "@types/react": "^18.0.15",
     "@types/styled-system": "^5.1.23",
@@ -60,5 +61,8 @@
   },
   "peerDependencies": {
     "react": ">= 17.0.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

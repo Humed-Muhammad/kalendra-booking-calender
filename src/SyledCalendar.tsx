@@ -3,7 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import styled from "styled-components";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker> & {};
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  nextRef?: React.Ref<HTMLButtonElement>;
+};
 
 const CalendarContainer = styled.div`
   border-radius: 12px;
@@ -157,7 +159,7 @@ const StyledDayPicker = styled(DayPicker)`
   }
 `;
 
-function Calendar({ className, ...props }: CalendarProps) {
+function Calendar({ className, nextRef, ...props }: CalendarProps) {
   return (
     <CalendarContainer>
       <StyledDayPicker
@@ -168,7 +170,18 @@ function Calendar({ className, ...props }: CalendarProps) {
             <ChevronLeft className={className} {...props} />
           ),
           IconRight: ({ className, ...props }: any) => (
-            <ChevronRight className={className} {...props} />
+            <button
+              className={className}
+              {...props}
+              ref={nextRef}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ChevronRight />
+            </button>
           ),
         }}
       />
