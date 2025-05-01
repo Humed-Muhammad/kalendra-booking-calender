@@ -18,7 +18,7 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const {
     data: eventTypeSetting,
     isLoading: isFetchingEventTypeSettings,
-    isError: eventTypeSettingError,
+    // isError: eventTypeSettingError,
   } = usePocketBaseQuery<EventTypeSettings>({
     collectionName: collectionNames.event_type_settings,
     single: true,
@@ -32,7 +32,7 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const {
     data: availabilities,
     isLoading,
-    isError: availabilityError,
+    // isError: availabilityError,
   } = usePocketBaseQuery<Array<Availability>>({
     collectionName: collectionNames.availability,
     options: {
@@ -45,7 +45,7 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const {
     data: bookings,
     isLoading: isFetchingBooking,
-    isError: isFetchingBookingError,
+    // isError: isFetchingBookingError,
   } = usePocketBaseEndpoint<Array<Booking>>({
     url: "/get-round-robin-bookings",
     options: {
@@ -107,12 +107,12 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
         }
         bookings={bookings}
         {...rest}
-        isError={
-          rest.isError ||
-          availabilityError ||
-          eventTypeSettingError ||
-          isFetchingBookingError
-        }
+        // isError={
+        //   rest.isError ||
+        //   availabilityError ||
+        //   eventTypeSettingError ||
+        //   isFetchingBookingError
+        // }
       />
     </div>
   );

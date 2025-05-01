@@ -31,7 +31,7 @@ export const NormalBooking = (props: Props) => {
   const {
     data: eventTypeSetting,
     isLoading: isFetchingEventSettings,
-    isError: eventTypeSettingError,
+    // isError: eventTypeSettingError,
   } = usePocketBaseQuery<EventTypeSettings>({
     collectionName: collectionNames.event_type_settings,
     single: true,
@@ -44,7 +44,7 @@ export const NormalBooking = (props: Props) => {
   const {
     data: availability,
     isLoading,
-    isError: availabilityError,
+    // isError: availabilityError,
   } = usePocketBaseQuery<Array<Availability>>({
     collectionName: collectionNames.availability,
     options: {
@@ -57,7 +57,7 @@ export const NormalBooking = (props: Props) => {
   const {
     data: bookings,
     isLoading: isFetchingBooking,
-    isError: isFetchingBookingError,
+    // isError: isFetchingBookingError,
   } = usePocketBaseEndpoint<Array<Booking>>({
     url: "/get-user-bookings",
     options: {
@@ -94,12 +94,12 @@ export const NormalBooking = (props: Props) => {
       }
       bookingToBeRescheduled={bookingToBeRescheduled}
       {...props}
-      isError={
-        props.isError ||
-        availabilityError ||
-        eventTypeSettingError ||
-        isFetchingBookingError
-      }
+      // isError={
+      //   props.isError ||
+      //   availabilityError ||
+      //   eventTypeSettingError ||
+      //   isFetchingBookingError
+      // }
     />
   );
 };

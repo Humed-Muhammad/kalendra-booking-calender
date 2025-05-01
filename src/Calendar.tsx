@@ -385,16 +385,8 @@ export const BookingCalendar = ({
     []
   );
   useEffect(() => {
-    debouncedNavigate(
-      navigateNextMonth && !stopNavigation && !isFetching && !isError
-    );
-  }, [
-    navigateNextMonth,
-    debouncedNavigate,
-    stopNavigation,
-    isFetching,
-    isError,
-  ]);
+    debouncedNavigate(navigateNextMonth && !stopNavigation && !isFetching);
+  }, [navigateNextMonth, debouncedNavigate, stopNavigation, isFetching]);
   useEffect(() => {
     if (availability) {
       const isAvailable = availability?.availability?.some((slot) => {
