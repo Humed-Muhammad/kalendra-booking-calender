@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo } from "react";
 import { usePocketBaseQuery } from "./hooks/usePocketBase";
 import type { Availability, Booking, EventTypeSettings } from "./types";
 import type { BookingProps } from "./types/type";
@@ -8,6 +8,7 @@ import { BookingCalendar } from "./Calendar";
 
 interface Props extends BookingProps {
   isLoadingRootEventType: boolean;
+  setLoadingData: Dispatch<SetStateAction<boolean>>;
 }
 export const NormalBooking = (props: Props) => {
   const { kalendra_user_id, eventTypeId, bookingToBeRescheduledId } = props;
@@ -19,7 +20,6 @@ export const NormalBooking = (props: Props) => {
     id: bookingToBeRescheduledId,
     skip: !bookingToBeRescheduledId,
   });
-  const [bookingInitializing, setBookingInitializing] = useState(true);
   const userId = useMemo(
     () => bookingToBeRescheduled?.user || kalendra_user_id,
     [bookingToBeRescheduled, kalendra_user_id]
@@ -74,24 +74,30 @@ export const NormalBooking = (props: Props) => {
     () => availability?.find((item) => item.isDefault),
     [availability]
   );
-  useEffect(() => {
-    setTimeout(() => {
-      setBookingInitializing(false);
-    }, 500);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setBookingInitializing(false);
+  //   }, 500);
+  // }, []);
+  const isFetching = useMemo(
+    () =>
+      isFetchingBooking ||
+      isFetchingEventSettings ||
+      isFetchingBookingToReschedule,
+    [isFetchingBooking, isFetchingEventSettings, isFetchingBookingToReschedule]
+  );
 
+  useEffect(() => {
+    if (!isFetching) {
+      props.setLoadingData(false);
+    }
+  }, [isFetching]);
   return (
     <BookingCalendar
       eventTypeSetting={eventTypeSetting}
       availability={defaultAvailability ?? availability?.[0]}
       bookings={bookings}
-      isFetching={
-        isLoading ||
-        isFetchingBooking ||
-        isFetchingEventSettings ||
-        bookingInitializing ||
-        isFetchingBookingToReschedule
-      }
+      isFetching={isLoading || isFetching}
       bookingToBeRescheduled={bookingToBeRescheduled}
       {...props}
       // isError={

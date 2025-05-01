@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo } from "react";
 import { Availability, Booking, EventType, EventTypeSettings } from "./types";
 import { usePocketBaseQuery } from "./hooks/usePocketBase";
 import { collectionNames } from "./utils";
@@ -9,9 +9,14 @@ import { BookingCalendar } from "./Calendar";
 interface Props extends BookingProps {
   eventType: EventType;
   isLoadingRootEventType: boolean;
+  setLoadingData: Dispatch<SetStateAction<boolean>>;
 }
 
-export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
+export const RoundRobinBooking = ({
+  eventType,
+  setLoadingData,
+  ...rest
+}: Props) => {
   const membersUsers = useMemo(() => {
     return eventType?.expand?.members?.map((member) => member.user);
   }, [eventType]);
@@ -95,6 +100,17 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
         }
       );
   }, [availabilities]);
+
+  const isFetching = useMemo(
+    () => isFetchingEventTypeSettings || isFetchingBooking,
+    [isFetchingEventTypeSettings, isFetchingBooking]
+  );
+
+  useEffect(() => {
+    if (!isFetching) {
+      setLoadingData(false);
+    }
+  }, [isFetching]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center p-3">
