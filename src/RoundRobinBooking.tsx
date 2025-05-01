@@ -15,20 +15,25 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const membersUsers = useMemo(() => {
     return eventType?.expand?.members?.map((member) => member.user);
   }, [eventType]);
-  const { data: eventTypeSetting, isLoading: isFetchingEventTypeSettings } =
-    usePocketBaseQuery<EventTypeSettings>({
-      collectionName: collectionNames.event_type_settings,
-      single: true,
-      options: {
-        filter: `event_type = "${eventType?.id}"`,
-        expand: "user, event_type, event_type.team",
-      },
-      skip: !eventType?.id,
-    });
+  const {
+    data: eventTypeSetting,
+    isLoading: isFetchingEventTypeSettings,
+    isError: eventTypeSettingError,
+  } = usePocketBaseQuery<EventTypeSettings>({
+    collectionName: collectionNames.event_type_settings,
+    single: true,
+    options: {
+      filter: `event_type = "${eventType?.id}"`,
+      expand: "user, event_type, event_type.team",
+    },
+    skip: !eventType?.id,
+  });
   const userFilter = membersUsers?.map((id) => `user="${id}"`).join(" || ");
-  const { data: availabilities, isLoading } = usePocketBaseQuery<
-    Array<Availability>
-  >({
+  const {
+    data: availabilities,
+    isLoading,
+    isError: availabilityError,
+  } = usePocketBaseQuery<Array<Availability>>({
     collectionName: collectionNames.availability,
     options: {
       filter: `(${userFilter}) && organization = "${eventType?.organization}"`,
@@ -37,17 +42,20 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
     skip: !eventType,
   });
 
-  const { data: bookings, isLoading: isFetchingBooking } =
-    usePocketBaseEndpoint<Array<Booking>>({
-      url: "/get-round-robin-bookings",
-      options: {
-        method: "POST",
-        body: {
-          eventTypeId: eventType?.id,
-        },
+  const {
+    data: bookings,
+    isLoading: isFetchingBooking,
+    isError: isFetchingBookingError,
+  } = usePocketBaseEndpoint<Array<Booking>>({
+    url: "/get-round-robin-bookings",
+    options: {
+      method: "POST",
+      body: {
+        eventTypeId: eventType?.id,
       },
-      skip: !eventType?.id,
-    });
+    },
+    skip: !eventType?.id,
+  });
   // const { toast } = useToast();
   // const { push } = useRouter();
   const combinedAvailability = useMemo(() => {
@@ -99,6 +107,12 @@ export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
         }
         bookings={bookings}
         {...rest}
+        isError={
+          rest.isError ||
+          availabilityError ||
+          eventTypeSettingError ||
+          isFetchingBookingError
+        }
       />
     </div>
   );

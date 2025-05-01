@@ -381,12 +381,20 @@ export const BookingCalendar = ({
           nextRef.current?.click();
         }
       }
-    }, 1000),
+    }, 2000),
     []
   );
   useEffect(() => {
-    debouncedNavigate(navigateNextMonth && !stopNavigation);
-  }, [navigateNextMonth, debouncedNavigate, stopNavigation]);
+    debouncedNavigate(
+      navigateNextMonth && !stopNavigation && !isFetching && !isError
+    );
+  }, [
+    navigateNextMonth,
+    debouncedNavigate,
+    stopNavigation,
+    isFetching,
+    isError,
+  ]);
   useEffect(() => {
     if (availability) {
       const isAvailable = availability?.availability?.some((slot) => {

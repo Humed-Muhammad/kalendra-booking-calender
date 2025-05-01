@@ -90,8 +90,8 @@ export const EventTypeError = () => (
         Sorry, we couldn't locate the event type you're looking for. It might
         have been deleted or the link is broken.
       </Message>
-      <Message>Try checking the link or contact the site owner.</Message>
-      <Message>Contact website owner for support</Message>
+      <Message>Try refreshing the page</Message>
+      <Message>If issue persist contact website owner for support</Message>
     </Card>
   </Container>
 );
