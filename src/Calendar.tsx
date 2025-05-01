@@ -386,6 +386,13 @@ export const BookingCalendar = ({
     }, 2000),
     []
   );
+
+  useEffect(() => {
+    if (!date) {
+      setSlot(undefined);
+    }
+  }, [date]);
+
   useEffect(() => {
     debouncedNavigate(navigateNextMonth && !stopNavigation && !isFetching);
   }, [navigateNextMonth, debouncedNavigate, stopNavigation, isFetching]);
@@ -641,12 +648,7 @@ export const BookingCalendar = ({
                 nextRef={nextRef}
                 mode="single"
                 selected={date}
-                onSelect={(dateValue) => {
-                  setDate(dateValue);
-                  if (!dateValue) {
-                    setSlot(undefined);
-                  }
-                }}
+                onSelect={setDate}
                 disabled={(date) => {
                   const hasAva = hasAvailability(date);
                   if (hasAva) {
