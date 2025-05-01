@@ -17,6 +17,7 @@ export declare const lightTheme: {
         transparent: string;
         dayBg: string;
         error: string;
+        currentDayIndicator: string;
     };
     shadows: {
         base: string;
@@ -49,6 +50,7 @@ export declare const darkTheme: {
         dayBg: string;
         dayColor: string;
         error: string;
+        currentDayIndicator: string;
     };
     shadows: {
         base: string;

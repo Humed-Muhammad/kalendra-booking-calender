@@ -17,6 +17,7 @@ export const lightTheme = {
     transparent: "transparent",
     dayBg: "#cbd5e1",
     error: "#f87171",
+    currentDayIndicator: "#f87171",
   },
   shadows: {
     base: "0px 4px 4px 0px #00000040",
@@ -50,6 +51,7 @@ export const darkTheme = {
     dayBg: "#27272A", // Slightly lighter than the
     dayColor: "#f8fafc",
     error: "#f87171",
+    currentDayIndicator: "#f87171",
   },
   shadows: {
     base: "0px 4px 4px 0px #00000040",

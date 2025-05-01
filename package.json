@@ -1,6 +1,6 @@
 {
   "name": "kalendra",
-  "version": "0.0.62",
+  "version": "0.0.64",
   "main": "./lib/src/index.js",
   "module": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",

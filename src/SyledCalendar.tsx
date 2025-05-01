@@ -35,6 +35,22 @@ const StyledDayPicker = styled(DayPicker)`
     justify-content: center;
   }
 
+  .rdp-day_today {
+    position: relative;
+  }
+  .rdp-day_today::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: ${(props: any) =>
+      props.theme.colors.currentDayIndicator} !important;
+  }
+
   .rdp-caption {
     display: flex;
     justify-content: center;
@@ -178,6 +194,10 @@ function Calendar({ className, nextRef, ...props }: CalendarProps) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: "2px",
               }}
             >
               <ChevronRight />
