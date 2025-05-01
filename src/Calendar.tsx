@@ -373,6 +373,7 @@ export const BookingCalendar = ({
   // Navigate to next month if no slots are available on the current month
   const nextRef = useRef<HTMLButtonElement>(null);
   const [navigateNextMonth, setNavigateNextMonth] = useState(true);
+  const [stopNavigation, setStopNavigation] = useState(false);
   const debouncedNavigate = useCallback(
     debounce((value: boolean) => {
       if (value) {
@@ -384,8 +385,23 @@ export const BookingCalendar = ({
     []
   );
   useEffect(() => {
-    debouncedNavigate(navigateNextMonth);
-  }, [navigateNextMonth, debouncedNavigate]);
+    debouncedNavigate(navigateNextMonth && !stopNavigation);
+  }, [navigateNextMonth, debouncedNavigate, stopNavigation]);
+  useEffect(() => {
+    if (availability) {
+      const isAvailable = availability?.availability?.some((slot) => {
+        return slot.length;
+      });
+      const hasOverride = availability?.dateOverrides?.some((slot) => {
+        return slot.availability.length;
+      });
+      if (!isAvailable && !hasOverride) {
+        setStopNavigation(true);
+      } else {
+        setStopNavigation(false);
+      }
+    }
+  }, [availability]);
 
   if (isFetching) {
     return (
