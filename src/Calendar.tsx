@@ -50,7 +50,7 @@ import { useDisclosure } from "./hooks/useDisclosure";
 import { Avatar } from "./Core/Avatar/index";
 import { useGetTimeSlots } from "./hooks/useGetTimeSlots";
 import { EventTypeError } from "./NoEventFoundError";
-import { KalendraLoader } from "./icons/KalendraLoader";
+// import { KalendraLoader } from "./icons/KalendraLoader";
 import { KalendraContext } from "./context/context";
 import { debounce } from "lodash";
 type Props = {
@@ -80,7 +80,7 @@ export const BookingCalendar = ({
   duration,
   responses,
   bookings,
-  LoadingIndicator,
+  // LoadingIndicator,
   NoEventError,
   isRoundRobin,
   isError,
@@ -211,7 +211,9 @@ export const BookingCalendar = ({
   // replace with success component later
   const bookingTitle = useCallback(
     (userResponses: Record<string, any>) => {
-      const eventTitle = eventTypeSetting?.expand?.event_type?.title;
+      const eventTitle =
+        eventTypeSetting?.settings?.title ||
+        eventTypeSetting?.expand?.event_type?.title;
       const attendees = [
         {
           name: eventTypeSetting?.expand.user?.name,
@@ -402,14 +404,6 @@ export const BookingCalendar = ({
       }
     }
   }, [availability]);
-
-  if (isFetching) {
-    return (
-      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
-        {LoadingIndicator ? LoadingIndicator : <KalendraLoader />}
-      </Container>
-    );
-  }
 
   if (isError) return NoEventError ? NoEventError : <EventTypeError />;
 
