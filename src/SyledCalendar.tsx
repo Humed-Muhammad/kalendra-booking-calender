@@ -26,6 +26,7 @@ const StyledDayPicker = styled(DayPicker)`
     background-color: ${(props: any) => props.theme.colors.background};
   }
   .rdp-months {
+    direction: ltr;
     display: flex;
     flex-direction: column;
     gap: 16px;

@@ -6,7 +6,13 @@ import {
   minimumNoticeTypeValue,
 } from "./utils";
 import { usePocketBaseMutation } from "./hooks/usePocketBase";
-import { Availability, Booking, EventTypeSettings, Slot } from "./types";
+import type {
+  Availability,
+  Booking,
+  EventTypeSettings,
+  Slot,
+  ContentType,
+} from "./types";
 import { addMinutes, format } from "date-fns";
 import { CalendarIcon, Globe, Link, TimerIcon } from "lucide-react";
 import {
@@ -53,6 +59,7 @@ import { EventTypeError } from "./NoEventFoundError";
 // import { KalendraLoader } from "./icons/KalendraLoader";
 import { KalendraContext } from "./context/context";
 import { debounce } from "lodash";
+import { type Direction } from "./Core/common/types";
 type Props = {
   availability: Partial<Availability>;
   isFetching: boolean;
@@ -69,6 +76,11 @@ type Props = {
   NoEventError?: JSX.Element | undefined;
   isRoundRobin?: boolean;
   isError?: boolean;
+  content?: ContentType;
+  /**
+   * The direction of the calendar.
+   */
+  direction?: Direction | Array<Direction> | undefined;
 };
 export const BookingCalendar = ({
   availability,
@@ -84,6 +96,8 @@ export const BookingCalendar = ({
   NoEventError,
   isRoundRobin,
   isError,
+  direction,
+  content,
   onError,
   onSuccess,
 }: Props) => {
@@ -233,9 +247,26 @@ export const BookingCalendar = ({
     },
     [eventTypeSetting]
   );
+
+  const formatTimeZone = (host: boolean) => {
+    const timezone = host
+      ? eventTypeSetting?.expand?.user?.timezone
+      : browserTimezone;
+    let formattedTime = "";
+    try {
+      formattedTime = `${new Intl.DateTimeFormat("en-US", {
+        dateStyle: "full",
+        timeStyle: "short",
+        timeZone: timezone,
+      }).format(slot?.utcTime)}(${timezone})`;
+    } catch (error) {
+      console.log(error);
+    }
+    return formattedTime;
+  };
+
   const onSubmit = async (responses: Record<string, any>) => {
     const body = {
-      bookingId: bookingToBeRescheduled?.id,
       responses,
       eventType: eventTypeSetting?.event_type,
       user: eventTypeSetting?.user,
@@ -259,13 +290,16 @@ export const BookingCalendar = ({
       description: eventTypeSetting?.settings?.description,
       location: eventTypeSetting?.settings?.location,
       duration: incrementStep,
+      inviteesTimezone: browserTimezone,
+      inviteeFormattedStartTime: formatTimeZone(false),
+      hostFormattedStartTime: formatTimeZone(true),
     };
     if (isRescheduling) {
       setIsReschedulingLoading(true);
       await db
         ?.send<Booking>("/reschedule-booking", {
           method: "PATCH",
-          body,
+          body: { ...body, bookingId: bookingToBeRescheduled?.id },
         })
         .then(onSuccess)
         .catch((err: any) => onError?.(err?.response))
@@ -282,31 +316,7 @@ export const BookingCalendar = ({
           db: db!,
         });
       } else {
-        mutate({
-          responses,
-          eventType: eventTypeSetting?.event_type,
-          user: eventTypeSetting?.user,
-          attendees: [
-            {
-              name: eventTypeSetting?.expand.user?.name,
-              email: eventTypeSetting?.expand.user?.email,
-              host: true,
-            },
-            {
-              name: responses.name,
-              email: responses.email,
-              host: false,
-            },
-          ],
-          startTime: slot?.utcTime,
-          endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
-          status: isRescheduling ? "rescheduled" : "confirmed",
-          recurring: false,
-          title: bookingTitle(responses),
-          description: eventTypeSetting?.settings?.description,
-          location: eventTypeSetting?.settings?.location,
-          duration: incrementStep,
-        })
+        mutate(body)
           .then((fulfilled) => {
             if (fulfilled) {
               if (onSuccess) {
@@ -424,6 +434,7 @@ export const BookingCalendar = ({
         className="calendar-container"
         hideScrollBar
         justifyContent="flex-start"
+        direction={direction}
       >
         <Flex
           flexDirection="column"
@@ -478,7 +489,9 @@ export const BookingCalendar = ({
               ? eventTypeSetting?.expand?.event_type?.expand?.team?.name
               : availability?.expand?.user?.name}
           </Text>
-          <Text fontSize={20}>{eventTypeSetting?.settings?.title}</Text>
+          <Text fontSize={20}>
+            {content?.bookingEventType ?? eventTypeSetting?.settings?.title}
+          </Text>
           <CenterColumn gap={16}>
             <CenterRow gap={"8px"}>
               <Text>
@@ -498,7 +511,12 @@ export const BookingCalendar = ({
                   setIncrementStep={setIncrementStep}
                 />
               ) : (
-                <Text>{formatSlotMinutes(Number(incrementStep ?? 0))}</Text>
+                <Text>
+                  {formatSlotMinutes({
+                    minutes: Number(incrementStep ?? 0),
+                    ...(content ?? {}),
+                  })}
+                </Text>
               )}
             </CenterRow>
             {isRescheduling && (
@@ -512,7 +530,9 @@ export const BookingCalendar = ({
                       }}
                     />
                   </Text>
-                  <Text fontSize="15px">Former time</Text>
+                  <Text fontSize="15px">
+                    {content?.formerTime ?? "Former time"}
+                  </Text>
                 </Flex>
                 <Text
                   ml={"25px"}
@@ -627,6 +647,7 @@ export const BookingCalendar = ({
               isLoading={
                 isLoading || isReschedulingLoading || creatingRoundRobinBooking
               }
+              content={content}
             />
           </Flex>
         ) : (
@@ -690,6 +711,7 @@ export const BookingCalendar = ({
                       options={["12h", "24h"]}
                       activeTab={activeTab}
                       onChange={setActiveTab}
+                      content={content}
                     />
                   </TabsHeader>
                 )}
@@ -717,7 +739,9 @@ export const BookingCalendar = ({
                             selected={time.utcTime === slot?.utcTime}
                           >
                             <Text variant="light">
-                              {formatDisplayTime(time)}
+                              {formatDisplayTime(time)
+                                .replace("am", content?.am ?? "am")
+                                .replace("pm", content?.pm ?? "pm")}
                             </Text>
                           </TimeSlot>
                           {showSubmitButton &&
@@ -741,7 +765,7 @@ export const BookingCalendar = ({
                                   creatingRoundRobinBooking ? (
                                     <LoadingDots />
                                   ) : (
-                                    "Book"
+                                    content?.book ?? "Book"
                                   )}
                                 </Text>
                               </Button>
@@ -751,8 +775,9 @@ export const BookingCalendar = ({
                     ) : (
                       <Text overflowY="hidden" height="max-content">
                         {date
-                          ? "No available time slots for this date"
-                          : "Please select a date"}
+                          ? content?.noAvailableSlots ??
+                            "No available time slots for this date"
+                          : content?.pleaseSelectDate ?? "Please select a date"}
                       </Text>
                     )}
                   </TimeSlotContainer>
@@ -781,11 +806,13 @@ type ScrollableRowProps = {
   incrementStep: number | undefined;
   setIncrementStep: (step: number) => void;
   isOpen: boolean | undefined;
+  contents?: ContentType | undefined;
 };
 const ScrollableRow = ({
   eventTypeSetting,
   incrementStep,
   isOpen,
+  contents,
   setIncrementStep,
 }: ScrollableRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -885,7 +912,7 @@ const ScrollableRow = ({
               fontSize={13}
               fontWeight="normal"
             >
-              {formatSlotMinutes(slot)}
+              {formatSlotMinutes({ minutes: slot, ...(contents ?? {}) })}
             </Text>
           </Button>
         ))}

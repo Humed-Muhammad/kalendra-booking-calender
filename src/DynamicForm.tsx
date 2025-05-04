@@ -11,9 +11,13 @@ import { DynamicFormTypes } from "./types/type";
 import { LoadingDots } from "./icons/index";
 import { FormikObserver } from "./FormikObserver";
 import { PhoneNumberInput } from "./PhoneNumberInput";
+import { ContentType } from "./types";
 
 // Function to dynamically build Yup validation schema
-const buildValidationSchema = (fields: Array<DynamicFormTypes>) => {
+const buildValidationSchema = (
+  fields: Array<DynamicFormTypes>,
+  content?: ContentType
+) => {
   const schema = {};
   fields?.forEach((field) => {
     const { identifier, type, required, hidden } = field;
@@ -24,12 +28,25 @@ const buildValidationSchema = (fields: Array<DynamicFormTypes>) => {
     let urlValidator = Yup.string().url("Invalid URL");
     let arrayValidator = Yup.array();
     if (required && !hidden) {
-      stringValidator = stringValidator.required(`${field.label} is required`);
-      emailValidator = emailValidator.required(`${field.label} is required`);
-      numberValidator = numberValidator.required(`${field.label} is required`);
-      dateValidator = dateValidator.required(`${field.label} is required`);
-      urlValidator = urlValidator.required(`${field.label} is required`);
-      arrayValidator = arrayValidator.min(1, `${field.label} is required`);
+      stringValidator = stringValidator.required(
+        `${content?.required ?? "Required"}`
+      );
+      emailValidator = emailValidator.required(
+        `${content?.required ?? "Required"}`
+      );
+      numberValidator = numberValidator.required(
+        `${content?.required ?? "Required"}`
+      );
+      dateValidator = dateValidator.required(
+        `${content?.required ?? "Required"}`
+      );
+      urlValidator = urlValidator.required(
+        `${content?.required ?? "Required"}`
+      );
+      arrayValidator = arrayValidator.min(
+        1,
+        `${content?.required ?? "Required"}`
+      );
     }
 
     if (type === "number") {
@@ -67,6 +84,7 @@ type DynamicFormProps = {
   bookingQuestions?: any;
   onSubmit: (values: any) => void;
   isLoading: boolean;
+  content?: ContentType | undefined;
 };
 export const DynamicForm = ({
   onBack,
@@ -74,6 +92,7 @@ export const DynamicForm = ({
   isLoading,
   fields,
   bookingQuestions,
+  content,
 }: DynamicFormProps) => {
   const handleDisable = (identifier: string, field: DynamicFormTypes) => {
     return bookingQuestions?.[identifier] && field?.disableIfPrefilled
@@ -83,7 +102,7 @@ export const DynamicForm = ({
   return (
     <Formik
       initialValues={{ ...bookingQuestions }}
-      validationSchema={buildValidationSchema(fields)}
+      validationSchema={buildValidationSchema(fields, content)}
       onSubmit={onSubmit}
       validateOnBlur={false}
       validateOnMount={false}
@@ -293,7 +312,7 @@ export const DynamicForm = ({
                 type="button"
                 onClick={onBack}
               >
-                Back
+                {content?.back ?? "Back"}
               </Button>
               <Button
                 border="none"
@@ -302,7 +321,7 @@ export const DynamicForm = ({
                 p={"8px"}
                 type="submit"
               >
-                {isLoading ? <LoadingDots /> : "Submit"}
+                {isLoading ? <LoadingDots /> : content?.submit ?? "Submit"}
               </Button>
             </CenterRow>
             <FormikObserver data={bookingQuestions} />

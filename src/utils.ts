@@ -2,19 +2,27 @@ import { format, toZonedTime } from "date-fns-tz";
 import { Booking } from "./types";
 import Pocketbase from "pocketbase";
 
-export const formatSlotMinutes = (minutes: number) => {
+type FormatSlotType = {
+  minutes: number;
+  m?: string;
+  hr?: string;
+  hrs?: string;
+};
+export const formatSlotMinutes = ({ minutes, hr, hrs, m }: FormatSlotType) => {
   if (minutes >= 60) {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
 
     if (remainingMinutes === 0) {
-      return hours === 1 ? `${hours}hr` : `${hours}hrs`;
+      return hours === 1 ? `${hours}${hr ?? "hr"}` : `${hours}${hrs ?? "hrs"}`;
     } else {
-      return `${hours}${hours === 1 ? "hr" : "hrs"} ${remainingMinutes}${"m"}`;
+      return `${hours}${
+        hours === 1 ? hr ?? "hr" : hrs ?? "hrs"
+      } ${remainingMinutes}${m ?? "m"}`;
     }
   }
 
-  return `${minutes}m`;
+  return `${minutes}${m ?? "m"}`;
 };
 
 export function getGMTOffset(timezone: string) {

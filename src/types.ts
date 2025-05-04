@@ -332,3 +332,20 @@ export type Slot = {
   user: string | undefined;
   users?: string[];
 };
+export type ContentType = {
+  pleaseSelectDate: string;
+  bookingEventType: string;
+  m: string;
+  hr: string;
+  "12hr": string;
+  "24hr": string;
+  am: string;
+  pm: string;
+  submit: string;
+  back: string;
+  book: string;
+  noAvailableSlots: string;
+  required: string;
+  formerTime: string;
+  termAndPolicy: string;
+};

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Box, Text } from "./Core/index";
 import { Button } from "./Core/Button/Button";
+import { ContentType } from "./types";
 
 export const TabsContainer = styled.div`
   display: flex;
@@ -101,8 +102,9 @@ type Props = {
   options: string[];
   activeTab: string;
   onChange: (tab: string) => void;
+  content: ContentType | undefined;
 };
-export const Tab = ({ options, activeTab, onChange }: Props) => {
+export const Tab = ({ options, activeTab, content, onChange }: Props) => {
   return (
     <TabsList>
       {options?.map((option) => (
@@ -111,7 +113,9 @@ export const Tab = ({ options, activeTab, onChange }: Props) => {
           active={activeTab === option}
           onClick={() => onChange(option)}
         >
-          <Text color="inherit">{option}</Text>
+          <Text color="inherit">
+            {content?.[option as keyof ContentType] ?? option}
+          </Text>
         </TabTrigger>
       ))}
     </TabsList>

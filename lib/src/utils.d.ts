@@ -1,6 +1,12 @@
 import { Booking } from "./types";
 import Pocketbase from "pocketbase";
-export declare const formatSlotMinutes: (minutes: number) => string;
+type FormatSlotType = {
+    minutes: number;
+    m?: string;
+    hr?: string;
+    hrs?: string;
+};
+export declare const formatSlotMinutes: ({ minutes, hr, hrs, m }: FormatSlotType) => string;
 export declare function getGMTOffset(timezone: string): string;
 export declare const getImage: ({ imageName, collectionName, recordId, pbUrl, }: {
     imageName: string;

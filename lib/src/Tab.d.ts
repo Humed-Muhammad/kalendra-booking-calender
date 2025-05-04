@@ -1,4 +1,5 @@
 /// <reference types="react" />
+import { ContentType } from "./types";
 export declare const TabsContainer: import("styled-components/dist/types").IStyledComponentBase<"web", import("styled-components").FastOmit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDivElement>, HTMLDivElement>, never>> & string;
 export declare const TabsHeader: import("styled-components/dist/types").IStyledComponentBase<"web", import("styled-components").FastOmit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDivElement>, HTMLDivElement>, never>> & string;
 export declare const Title: import("styled-components/dist/types").IStyledComponentBase<"web", import("styled-components").FastOmit<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, never>> & string;
@@ -20,6 +21,7 @@ type Props = {
     options: string[];
     activeTab: string;
     onChange: (tab: string) => void;
+    content: ContentType | undefined;
 };
-export declare const Tab: ({ options, activeTab, onChange }: Props) => JSX.Element;
+export declare const Tab: ({ options, activeTab, content, onChange }: Props) => JSX.Element;
 export {};
