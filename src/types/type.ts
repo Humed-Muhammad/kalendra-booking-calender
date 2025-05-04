@@ -6,6 +6,7 @@ import type {
   DateOverrides,
 } from "../types";
 import type { DefaultTheme } from "styled-components";
+import type { Direction } from "src/Core/common/types";
 
 export type DynamicFormTypes = {
   disableIfPrefilled: boolean;
@@ -45,4 +46,5 @@ export interface BookingProps {
   NoEventError?: JSX.Element;
   isError?: boolean;
   content?: ContentType | undefined;
+  direction?: Direction | Array<Direction> | undefined;
 }

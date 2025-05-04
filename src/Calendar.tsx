@@ -708,7 +708,7 @@ export const BookingCalendar = ({
                       </Text>
                     </Title>
                     <Tab
-                      options={["12h", "24h"]}
+                      options={["12hr", "24hr"]}
                       activeTab={activeTab}
                       onChange={setActiveTab}
                       content={content}
