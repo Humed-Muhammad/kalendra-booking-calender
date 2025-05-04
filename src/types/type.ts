@@ -1,6 +1,11 @@
-import { CSSProperties } from "react";
-import { Availability, Booking, DateOverrides } from "../types";
-import { DefaultTheme } from "styled-components";
+import type { CSSProperties } from "react";
+import type {
+  Availability,
+  Booking,
+  ContentType,
+  DateOverrides,
+} from "../types";
+import type { DefaultTheme } from "styled-components";
 
 export type DynamicFormTypes = {
   disableIfPrefilled: boolean;
@@ -39,4 +44,5 @@ export interface BookingProps {
   LoadingIndicator?: JSX.Element;
   NoEventError?: JSX.Element;
   isError?: boolean;
+  content?: ContentType | undefined;
 }
