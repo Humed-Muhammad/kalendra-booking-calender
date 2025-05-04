@@ -188,7 +188,7 @@ export const BookingCalendar = ({
     [availability, eventTypeSetting, getTimeSlots]
   );
 
-  const [activeTab, setActiveTab] = useState("12h");
+  const [activeTab, setActiveTab] = useState("12hr");
   useEffect(() => {
     if (bookingToBeRescheduled?.duration) {
       setIncrementStep(bookingToBeRescheduled.duration);
@@ -353,7 +353,7 @@ export const BookingCalendar = ({
     (time: { formattedTime: string; utcTime: Date }) => {
       let displayTime = time.formattedTime;
 
-      if (activeTab === "24h") {
+      if (activeTab === "24hr") {
         const [hourMin, period] = time.formattedTime.split(/([ap]m)$/);
         const [hour, minute] = hourMin.split(":")?.map(Number);
         let hour24 = hour;
@@ -509,6 +509,7 @@ export const BookingCalendar = ({
                   eventTypeSetting={eventTypeSetting}
                   incrementStep={incrementStep}
                   setIncrementStep={setIncrementStep}
+                  content={content}
                 />
               ) : (
                 <Text>
@@ -806,13 +807,13 @@ type ScrollableRowProps = {
   incrementStep: number | undefined;
   setIncrementStep: (step: number) => void;
   isOpen: boolean | undefined;
-  contents?: ContentType | undefined;
+  content?: ContentType | undefined;
 };
 const ScrollableRow = ({
   eventTypeSetting,
   incrementStep,
   isOpen,
-  contents,
+  content,
   setIncrementStep,
 }: ScrollableRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -912,7 +913,7 @@ const ScrollableRow = ({
               fontSize={13}
               fontWeight="normal"
             >
-              {formatSlotMinutes({ minutes: slot, ...(contents ?? {}) })}
+              {formatSlotMinutes({ minutes: slot, ...(content ?? {}) })}
             </Text>
           </Button>
         ))}
