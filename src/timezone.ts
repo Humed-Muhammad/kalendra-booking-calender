@@ -541,7 +541,6 @@ export const timezones = [
   { label: "Indian/Mayotte", value: "Indian/Mayotte" },
   { label: "Indian/Reunion", value: "Indian/Reunion" },
   { label: "Iran", value: "Iran" },
-  { label: "Israel", value: "Israel" },
   { label: "Jamaica", value: "Jamaica" },
   { label: "Japan", value: "Japan" },
   { label: "Kwajalein", value: "Kwajalein" },
