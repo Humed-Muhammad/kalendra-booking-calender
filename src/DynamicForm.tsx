@@ -12,6 +12,7 @@ import { LoadingDots } from "./icons/index";
 import { FormikObserver } from "./FormikObserver";
 import { PhoneNumberInput } from "./PhoneNumberInput";
 import { ContentType } from "./types";
+import { useState } from "react";
 
 // Function to dynamically build Yup validation schema
 const buildValidationSchema = (
@@ -19,61 +20,81 @@ const buildValidationSchema = (
   content?: ContentType
 ) => {
   const schema = {};
+
   fields?.forEach((field) => {
-    const { identifier, type, required, hidden } = field;
+    const { identifier, type, required, hidden, label } = field;
+
     let stringValidator = Yup.string();
-    let emailValidator = Yup.string().email("Invalid email");
+    let emailValidator = Yup.string()
+      .max(50, "Email can not be more than 50 characters")
+      .email("Invalid email");
     let numberValidator = Yup.number();
     let dateValidator = Yup.date();
     let urlValidator = Yup.string().url("Invalid URL");
     let arrayValidator = Yup.array();
+
     if (required && !hidden) {
-      stringValidator = stringValidator.required(
-        `${content?.required ?? "Required"}`
-      );
-      emailValidator = emailValidator.required(
-        `${content?.required ?? "Required"}`
-      );
-      numberValidator = numberValidator.required(
-        `${content?.required ?? "Required"}`
-      );
-      dateValidator = dateValidator.required(
-        `${content?.required ?? "Required"}`
-      );
-      urlValidator = urlValidator.required(
-        `${content?.required ?? "Required"}`
-      );
-      arrayValidator = arrayValidator.min(
-        1,
-        `${content?.required ?? "Required"}`
-      );
+      const requiredMsg = `${content?.required ?? "Required"}`;
+      stringValidator = stringValidator.required(requiredMsg);
+      emailValidator = emailValidator.required(requiredMsg);
+      numberValidator = numberValidator.required(requiredMsg);
+      dateValidator = dateValidator.required(requiredMsg);
+      urlValidator = urlValidator.required(requiredMsg);
+      arrayValidator = arrayValidator.min(1, requiredMsg);
     }
 
-    if (type === "number") {
-      (schema as Record<string, any>)[identifier] = numberValidator;
-    } else if (type === "phone") {
-      (schema as Record<string, any>)[identifier] = stringValidator
-        .trim()
-        .matches(/^\+?\d{10,15}$/, "Phone number is invalid")
-        .nullable();
-    } else if (type === "checkbox") {
-      (schema as Record<string, any>)[identifier] = arrayValidator;
-    } else if (type === "dropdown" || type === "multipleChoice") {
-      (schema as Record<string, any>)[identifier] = stringValidator.nullable();
-    } else if (type === "date") {
-      (schema as Record<string, any>)[identifier] = dateValidator.required(
-        `${field.label} is required`
-      );
-    } else if (type === "url") {
-      (schema as Record<string, any>)[identifier] = urlValidator.nullable();
-    } else if (type === "textarea") {
-      (schema as Record<string, any>)[identifier] = stringValidator.nullable();
-    } else if (type === "email") {
-      (schema as Record<string, any>)[identifier] = emailValidator.nullable();
-    } else if (type === "text") {
-      (schema as Record<string, any>)[identifier] = stringValidator.nullable();
+    // if (maxLength) {
+    stringValidator = stringValidator.max(
+      type === "textarea" ? 1000 : 100,
+      `${label ?? identifier} must be at most ${
+        type === "textarea" ? 1000 : 100
+      } characters`
+    );
+    // }
+
+    // if (disallowSpecialChars) {
+    stringValidator = stringValidator.matches(
+      /^[a-zA-Z0-9\s]*$/,
+      `${label ?? identifier} cannot contain special characters`
+    );
+    // }
+
+    switch (type) {
+      case "number":
+        (schema as Record<string, any>)[identifier] = numberValidator;
+        break;
+      case "phone":
+        (schema as Record<string, any>)[identifier] = stringValidator
+          .matches(/^\+?\d{10,15}$/, "Phone number is invalid")
+          .nullable();
+        break;
+      case "checkbox":
+        (schema as Record<string, any>)[identifier] = arrayValidator;
+        break;
+      case "dropdown":
+      case "multipleChoice":
+        (schema as Record<string, any>)[identifier] =
+          stringValidator.nullable();
+        break;
+      case "date":
+        (schema as Record<string, any>)[identifier] = dateValidator.required(
+          `${label ?? "Date"} is required`
+        );
+        break;
+      case "url":
+        (schema as Record<string, any>)[identifier] = urlValidator.nullable();
+        break;
+      case "textarea":
+      case "text":
+        (schema as Record<string, any>)[identifier] =
+          stringValidator.nullable();
+        break;
+      case "email":
+        (schema as Record<string, any>)[identifier] = emailValidator.nullable();
+        break;
     }
   });
+
   return Yup.object().shape(schema);
 };
 
@@ -94,6 +115,7 @@ export const DynamicForm = ({
   bookingQuestions,
   content,
 }: DynamicFormProps) => {
+  const [validateOnChange, setValidateOnChange] = useState(false);
   const handleDisable = (identifier: string, field: DynamicFormTypes) => {
     return bookingQuestions?.[identifier] && field?.disableIfPrefilled
       ? true
@@ -104,8 +126,10 @@ export const DynamicForm = ({
       initialValues={{ ...bookingQuestions }}
       validationSchema={buildValidationSchema(fields, content)}
       onSubmit={onSubmit}
-      validateOnBlur={false}
       validateOnMount={false}
+      validateOnChange={
+        Boolean(Object.values(bookingQuestions).length) || validateOnChange
+      }
     >
       {({ values, handleChange, setFieldValue, errors }) => {
         return (
@@ -320,6 +344,9 @@ export const DynamicForm = ({
                 color="background"
                 p={"8px"}
                 type="submit"
+                onClick={() => {
+                  setValidateOnChange(true);
+                }}
               >
                 {isLoading ? <LoadingDots /> : content?.submit ?? "Submit"}
               </Button>
