@@ -22,7 +22,8 @@ const buildValidationSchema = (
   const schema = {};
 
   fields?.forEach((field) => {
-    const { identifier, type, required, hidden, label } = field;
+    const { identifier, type, required, hidden, label, disallowSpecialChars } =
+      field;
 
     let stringValidator = Yup.string();
     let emailValidator = Yup.string()
@@ -52,12 +53,12 @@ const buildValidationSchema = (
     );
     // }
 
-    // if (disallowSpecialChars) {
-    stringValidator = stringValidator.matches(
-      /^[a-zA-Z0-9\s]*$/,
-      `${label ?? identifier} cannot contain special characters`
-    );
-    // }
+    if (disallowSpecialChars) {
+      stringValidator = stringValidator.matches(
+        /^[a-zA-Z0-9\s]*$/,
+        `${label ?? identifier} cannot contain special characters`
+      );
+    }
 
     switch (type) {
       case "number":

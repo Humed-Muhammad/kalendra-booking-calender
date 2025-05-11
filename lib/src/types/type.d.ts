@@ -15,6 +15,8 @@ export type DynamicFormTypes = {
     type: string;
     placeholder: string;
     hidden?: boolean;
+    disallowSpecialChars?: boolean;
+    maxLength?: number;
 };
 export interface Accumulator extends Partial<Availability> {
     availability: {
