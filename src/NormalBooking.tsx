@@ -75,6 +75,13 @@ export const NormalBooking = (props: Props) => {
     () => availability?.find((item) => item.isDefault),
     [availability]
   );
+  const linkedAvailability = useMemo(
+    () =>
+      availability?.find(
+        (item) => item.id === String(eventTypeSetting?.settings?.availability)
+      ),
+    [availability, eventTypeSetting?.settings?.availability]
+  );
   // useEffect(() => {
   //   setTimeout(() => {
   //     setBookingInitializing(false);
@@ -99,7 +106,9 @@ export const NormalBooking = (props: Props) => {
   return (
     <BookingCalendar
       eventTypeSetting={eventTypeSetting}
-      availability={defaultAvailability ?? availability?.[0]}
+      availability={
+        linkedAvailability ?? defaultAvailability ?? availability?.[0]
+      }
       bookings={bookings}
       isFetching={isLoading || isFetching}
       bookingToBeRescheduled={bookingToBeRescheduled}

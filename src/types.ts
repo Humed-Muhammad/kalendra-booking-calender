@@ -42,6 +42,7 @@ export type SetFieldValue<T = unknown> = (
 
 export interface EventType {
   id: string;
+  availability?: string;
   collectionId: string;
   collectionName: string;
   title: string;
@@ -231,7 +232,7 @@ export type Team = {
 };
 
 export type Availability = {
-  id: number;
+  id: string;
   name: string;
   availability: {
     start: string;
