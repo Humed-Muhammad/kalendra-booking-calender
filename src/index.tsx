@@ -86,6 +86,7 @@ const BookingCalendar = (props: Props) => {
       isError={isError}
       isLoadingRootEventType={isLoading}
       teamName={eventType?.teamName}
+      organizationId={eventType?.organization}
     />
   );
 };

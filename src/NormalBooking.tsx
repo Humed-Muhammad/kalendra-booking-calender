@@ -10,6 +10,7 @@ import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
   isLoadingRootEventType: boolean;
+  organizationId: string | undefined;
 }
 export const NormalBooking = (props: Props) => {
   const { kalendra_user_id, eventTypeId, bookingToBeRescheduledId } = props;
@@ -49,10 +50,10 @@ export const NormalBooking = (props: Props) => {
   } = usePocketBaseQuery<Array<Availability>>({
     collectionName: collectionNames.availability,
     options: {
-      filter: `user = "${userId}" && organization = "${eventTypeSetting?.expand?.event_type?.organization}"`,
+      filter: `user = "${userId}" && organization = "${props.organizationId}"`,
       expand: "user",
     },
-    skip: !userId || !eventTypeSetting?.expand?.event_type?.organization,
+    skip: !userId || !props.organizationId,
   });
 
   const {

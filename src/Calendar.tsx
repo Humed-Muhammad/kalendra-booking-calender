@@ -81,7 +81,7 @@ type Props = {
    * The direction of the calendar.
    */
   direction?: Direction | Array<Direction> | undefined;
-  teamName: string | undefined;
+  teamName?: string | undefined;
 };
 export const BookingCalendar = ({
   availability,

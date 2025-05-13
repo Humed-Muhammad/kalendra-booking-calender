@@ -41,5 +41,5 @@ export interface BookingProps {
     isError?: boolean;
     content?: ContentType | undefined;
     direction?: Direction | Array<Direction> | undefined;
-    teamName: string | undefined;
+    teamName?: string | undefined;
 }
