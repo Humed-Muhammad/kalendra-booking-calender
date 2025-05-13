@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { Availability, Booking, EventType, EventTypeSettings } from "./types";
+import {
+  Availability,
+  Booking,
+  GetEventTypeRes,
+  EventTypeSettings,
+} from "./types";
 import { usePocketBaseQuery } from "./hooks/usePocketBase";
 import { collectionNames } from "./utils";
 import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
@@ -9,13 +14,13 @@ import { Container } from "./Core/index";
 import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
-  eventType: EventType;
+  eventType: GetEventTypeRes;
   isLoadingRootEventType: boolean;
 }
 
 export const RoundRobinBooking = ({ eventType, ...rest }: Props) => {
   const membersUsers = useMemo(() => {
-    return eventType?.expand?.members?.map((member) => member.user);
+    return eventType?.members?.map((member) => member.user);
   }, [eventType]);
   const {
     data: eventTypeSetting,

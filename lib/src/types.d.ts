@@ -14,6 +14,16 @@ export interface ProductModel {
     thumbnail?: File | undefined;
     media?: Array<File | undefined>;
 }
+export type GetEventTypeRes = {
+    id: string;
+    type: string;
+    members: {
+        id: string;
+        user: string;
+    }[];
+    organization: string;
+    teamName: string;
+};
 export interface ProductCategoryModel {
     id: string;
     title: string | undefined;
@@ -35,6 +45,7 @@ export type ProductParams = {
 export type SetFieldValue<T = unknown> = (field: string, value: any, shouldValidate?: boolean | undefined) => Promise<void | FormikErrors<T>>;
 export interface EventType {
     id: string;
+    availability?: string;
     collectionId: string;
     collectionName: string;
     title: string;
@@ -208,7 +219,7 @@ export type Team = {
     members: Array<MembersType | string>;
 };
 export type Availability = {
-    id: number;
+    id: string;
     name: string;
     availability: {
         start: string;

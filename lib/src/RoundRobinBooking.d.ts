@@ -1,8 +1,8 @@
 /// <reference types="react" />
-import { EventType } from "./types";
+import { GetEventTypeRes } from "./types";
 import { BookingProps } from "./types/type";
 interface Props extends BookingProps {
-    eventType: EventType;
+    eventType: GetEventTypeRes;
     isLoadingRootEventType: boolean;
 }
 export declare const RoundRobinBooking: ({ eventType, ...rest }: Props) => JSX.Element;

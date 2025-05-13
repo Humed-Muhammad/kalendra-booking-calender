@@ -1,31 +1,49 @@
-import { usePocketBaseQuery } from "./hooks/usePocketBase";
-import { collectionNames } from "./utils";
-import { EventType } from "./types";
+// import { usePocketBaseQuery } from "./hooks/usePocketBase";
+// import { collectionNames } from "./utils";
+// import { EventType } from "./types";
 import { RoundRobinBooking } from "./RoundRobinBooking";
 import { BookingProps } from "./types/type";
 import { NormalBooking } from "./NormalBooking";
 import { KalendraContext, KalendraProvider } from "./context/context";
 import { useContext, useEffect, useState } from "react";
 import { Container } from "./Core/index";
+import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
+import { GetEventTypeRes } from "./types";
 // import { KalendraLoader } from "./icons/KalendraLoader";
 
 interface Props extends BookingProps {
   calenderUrl: string;
 }
+
 const BookingCalendar = (props: Props) => {
   const [initializing, setInitializing] = useState(true);
   const {
     data: eventType,
-    isError,
     isLoading,
-  } = usePocketBaseQuery<EventType>({
-    collectionName: collectionNames.event_types,
-    id: props.eventTypeId as string,
-    skip: !props.eventTypeId,
+    isError,
+  } = usePocketBaseEndpoint<GetEventTypeRes>({
+    url: `/event-type/single`,
     options: {
-      expand: "members",
+      method: "POST",
+      body: {
+        eventTypeId: props?.eventTypeId,
+      },
+
+      requestKey: null,
     },
   });
+  // const {
+  //   data: eventType,
+  //   isError,
+  //   isLoading,
+  // } = usePocketBaseQuery<EventType>({
+  //   collectionName: collectionNames.event_types,
+  //   id: props.eventTypeId as string,
+  //   skip: !props.eventTypeId,
+  //   options: {
+  //     expand: "members",
+  //   },
+  // });
 
   const { setPbUrl } = useContext(KalendraContext);
 
@@ -36,7 +54,7 @@ const BookingCalendar = (props: Props) => {
   useEffect(() => {
     setTimeout(() => {
       setInitializing(false);
-    }, 500);
+    }, 600);
   }, []);
 
   if (isLoading || initializing) {
@@ -58,6 +76,7 @@ const BookingCalendar = (props: Props) => {
         {...props}
         isError={isError}
         isLoadingRootEventType={isLoading}
+        teamName={eventType?.teamName}
       />
     );
   }
@@ -66,6 +85,7 @@ const BookingCalendar = (props: Props) => {
       {...props}
       isError={isError}
       isLoadingRootEventType={isLoading}
+      teamName={eventType?.teamName}
     />
   );
 };

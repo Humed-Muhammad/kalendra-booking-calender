@@ -81,6 +81,7 @@ type Props = {
    * The direction of the calendar.
    */
   direction?: Direction | Array<Direction> | undefined;
+  teamName: string | undefined;
 };
 export const BookingCalendar = ({
   availability,
@@ -98,6 +99,7 @@ export const BookingCalendar = ({
   isError,
   direction,
   content,
+  teamName,
   onError,
   onSuccess,
 }: Props) => {
@@ -474,10 +476,7 @@ export const BookingCalendar = ({
               }
               fallback={
                 isRoundRobin
-                  ? eventTypeSetting?.expand?.event_type?.expand?.team?.name?.substring(
-                      0,
-                      2
-                    )
+                  ? teamName?.substring(0, 2)
                   : eventTypeSetting?.expand?.user?.name?.substring(0, 2)
               }
               alt={eventTypeSetting?.expand?.user?.name}
@@ -485,9 +484,7 @@ export const BookingCalendar = ({
           </CenterRow>
 
           <Text color="#A3A3A3" fontSize={14}>
-            {isRoundRobin
-              ? eventTypeSetting?.expand?.event_type?.expand?.team?.name
-              : availability?.expand?.user?.name}
+            {isRoundRobin ? teamName : availability?.expand?.user?.name}
           </Text>
           <Text fontSize={20}>
             {content?.bookingEventType ?? eventTypeSetting?.settings?.title}

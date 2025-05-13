@@ -16,6 +16,16 @@ export interface ProductModel {
   media?: Array<File | undefined>;
 }
 
+export type GetEventTypeRes = {
+  id: string;
+  type: string;
+  members: {
+    id: string;
+    user: string;
+  }[];
+  organization: string;
+  teamName: string;
+};
 export interface ProductCategoryModel {
   id: string;
   title: string | undefined;

@@ -23,6 +23,7 @@ type Props = {
      * The direction of the calendar.
      */
     direction?: Direction | Array<Direction> | undefined;
+    teamName: string | undefined;
 };
-export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, NoEventError, isRoundRobin, isError, direction, content, onError, onSuccess, }: Props) => JSX.Element;
+export declare const BookingCalendar: ({ availability, isFetching, theme, styles, eventTypeSetting, bookingToBeRescheduled, duration, responses, bookings, NoEventError, isRoundRobin, isError, direction, content, teamName, onError, onSuccess, }: Props) => JSX.Element;
 export {};
