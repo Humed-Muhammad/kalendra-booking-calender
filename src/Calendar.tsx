@@ -260,7 +260,7 @@ export const BookingCalendar = ({
         dateStyle: "full",
         timeStyle: "short",
         timeZone: timezone,
-      }).format(slot?.utcTime)}(${timezone})`;
+      }).format(new Date(slot?.utcTime as string))}(${timezone})`;
     } catch (error) {
       console.log(error);
     }
@@ -285,7 +285,9 @@ export const BookingCalendar = ({
         },
       ],
       startTime: slot?.utcTime,
-      endTime: addMinutes(slot?.utcTime as Date, incrementStep as number),
+      /**@TODO fix the below line */
+      // @ts-ignore
+      endTime: addMinutes(slot?.utcTime, incrementStep as number),
       status: isRescheduling ? "rescheduled" : "confirmed",
       recurring: false,
       title: bookingTitle(responses),
@@ -352,7 +354,7 @@ export const BookingCalendar = ({
     });
   }, [responses, eventTypeSetting?.settings?.bookingQuestions]);
   const formatDisplayTime = useCallback(
-    (time: { formattedTime: string; utcTime: Date }) => {
+    (time: { formattedTime: string; utcTime: string }) => {
       let displayTime = time.formattedTime;
 
       if (activeTab === "24hr") {
@@ -558,7 +560,7 @@ export const BookingCalendar = ({
                     />
                   </Text>
                   <Text variant="light">
-                    {formatToTimeZone(slot?.utcTime?.toISOString(), timezone)}
+                    {formatToTimeZone(slot?.utcTime, timezone)}
                   </Text>
                 </CenterRow>
               </>

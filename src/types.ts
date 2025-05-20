@@ -339,7 +339,7 @@ export type Guest = {
 
 export type Slot = {
   formattedTime: string;
-  utcTime: Date;
+  utcTime: string;
   user: string | undefined;
   users?: string[];
 };

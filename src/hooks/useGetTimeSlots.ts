@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+import { format, formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { Availability, Booking, EventTypeSettings, Slot } from "../types";
 import { setHours, setMinutes } from "date-fns";
 import { formatToTimeZone } from "../utils";
@@ -75,7 +75,7 @@ export const useGetTimeSlots = ({
       // Generate time slots based on availability
       const slots: {
         formattedTime: string;
-        utcTime: Date;
+        utcTime: string;
         user: string | undefined;
         users?: string[];
       }[] = [];
@@ -102,18 +102,30 @@ export const useGetTimeSlots = ({
 
         while (currentTime < adjustedEndTime) {
           // Convert to user timezone for display
-          const formattedTime = formatToTimeZone(
+          const zoned = formatToTimeZone(
             currentTime,
             timezone,
-            "h:mmaaa"
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+            // "h:mmaaa"
           ); // e.g., "10:30am"
+
+          const utcTime = formatToTimeZone(
+            currentTime,
+            "UTC",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+            // "h:mmaaa"
+          );
+          const formattedTime = format(zoned, "h:mmaaa");
+          const formattedUtc = format(utcTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
+            timeZone: "UTC",
+          });
           const timeGap =
             new Date(adjustedEndTime).getTime() -
             new Date(currentTime).getTime();
           if (timeGap >= incrementTime) {
             slots.push({
               formattedTime,
-              utcTime: new Date(currentTime),
+              utcTime: formattedUtc,
               user: slot.user,
             });
           }
