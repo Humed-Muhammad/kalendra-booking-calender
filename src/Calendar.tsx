@@ -60,6 +60,7 @@ import { EventTypeError } from "./NoEventFoundError";
 import { KalendraContext } from "./context/context";
 import { debounce } from "lodash";
 import { type Direction } from "./Core/common/types";
+import { formatInTimeZone } from "date-fns-tz";
 type Props = {
   availability: Partial<Availability>;
   isFetching: boolean;
@@ -139,7 +140,7 @@ export const BookingCalendar = ({
       if (!slots.length) {
         return false;
       }
-      if (date < new Date()) {
+      if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
         return false;
       }
 
@@ -358,19 +359,7 @@ export const BookingCalendar = ({
       let displayTime = time.formattedTime;
 
       if (activeTab === "24hr") {
-        const [hourMin, period] = time.formattedTime.split(/([ap]m)$/);
-        const [hour, minute] = hourMin.split(":")?.map(Number);
-        let hour24 = hour;
-
-        if (period === "pm" && hour !== 12) {
-          hour24 += 12;
-        } else if (period === "am" && hour === 12) {
-          hour24 = 0;
-        }
-
-        displayTime = `${hour24.toString().padStart(2, "0")}:${minute
-          .toString()
-          .padStart(2, "0")}`;
+        displayTime = formatInTimeZone(new Date(time.utcTime), "UTC", "HH:mm");
       }
       return displayTime;
     },
