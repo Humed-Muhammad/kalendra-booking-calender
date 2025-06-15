@@ -42,7 +42,7 @@ const StyledDayPicker = styled(DayPicker)`
   .rdp-day_today::after {
     content: "";
     position: absolute;
-    bottom: 5px;
+    bottom: 3px;
     left: 50%;
     transform: translateX(-50%);
     width: 8px;

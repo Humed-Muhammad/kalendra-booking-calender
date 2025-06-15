@@ -3,7 +3,6 @@ import {
   collectionNames,
   createRoundRobin,
   formatToTimeZone,
-  minimumNoticeTypeValue,
 } from "./utils";
 import { usePocketBaseMutation } from "./hooks/usePocketBase";
 import type {
@@ -61,6 +60,7 @@ import { KalendraContext } from "./context/context";
 import { debounce } from "lodash";
 import { type Direction } from "./Core/common/types";
 import { formatInTimeZone } from "date-fns-tz";
+import { useCheckDateAllowed } from "./useCheckDateAllowed";
 type Props = {
   availability: Partial<Availability>;
   isFetching: boolean;
@@ -132,7 +132,7 @@ export const BookingCalendar = ({
     incrementStep,
     timezone,
   });
-
+  const { isSlotValidWithMinimumNotice } = useCheckDateAllowed();
   // Function to check if a date has availability
   const hasAvailability = useCallback(
     (date: Date) => {
@@ -140,7 +140,7 @@ export const BookingCalendar = ({
       if (!slots.length) {
         return false;
       }
-      if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+      if (date <= new Date(new Date().setHours(0, 0, 0, 0))) {
         return false;
       }
 
@@ -163,32 +163,33 @@ export const BookingCalendar = ({
       }
 
       // Otherwise check the regular weekly availability
-      if (eventTypeSetting?.settings?.minimumNotice) {
-        const minimumNotice = eventTypeSetting?.settings?.minimumNotice;
-        const minimumNoticeType = eventTypeSetting?.settings?.minimumNoticeType;
-        let noticeDate;
-        if (minimumNoticeType == minimumNoticeTypeValue.minutes) {
-          noticeDate = addMinutes(new Date(), minimumNotice);
-        } else if (minimumNoticeType == minimumNoticeTypeValue.hours) {
-          noticeDate = addMinutes(new Date(), minimumNotice * 60);
-        } else if (minimumNoticeType == minimumNoticeTypeValue.days) {
-          noticeDate = addMinutes(new Date(), minimumNotice * 60 * 24);
-        } else if (minimumNoticeType == minimumNoticeTypeValue.weeks) {
-          noticeDate = addMinutes(new Date(), minimumNotice * 60 * 24 * 7);
-        } else if (minimumNoticeType == minimumNoticeTypeValue.months) {
-          noticeDate = addMinutes(new Date(), minimumNotice * 60 * 24 * 30);
-        }
-
-        if (noticeDate) {
-          return (
-            date >= noticeDate &&
-            Number(availability.availability?.[dayOfWeek]?.length) > 0
-          );
-        }
+      let smallestDay = date.getDate();
+      if (smallestDay < date.getDate()) {
+        smallestDay = date.getDate();
       }
-      return Number(availability.availability?.[dayOfWeek]?.length) > 0;
+      // console.log(date.getDate(), new Date().getDate());
+      if (
+        eventTypeSetting?.settings?.minimumNotice &&
+        date.getDate() == new Date().getDate() + 1
+      ) {
+        const hasValidSlot = slots?.some((slot) => {
+          return isSlotValidWithMinimumNotice({
+            date,
+            minimumNotice: eventTypeSetting?.settings?.minimumNotice,
+            minimumNoticeType: eventTypeSetting?.settings?.minimumNoticeType,
+            slotStartTime: format(slot.utcTime, "HH:mm"),
+            timezone,
+          });
+        });
+
+        return (
+          hasValidSlot &&
+          Number(availability?.availability?.[dayOfWeek]?.length)
+        );
+      }
+      return Number(availability?.availability?.[dayOfWeek]?.length) > 0;
     },
-    [availability, eventTypeSetting, getTimeSlots]
+    [availability, eventTypeSetting, getTimeSlots, timezone]
   );
 
   const [activeTab, setActiveTab] = useState("12hr");
@@ -371,9 +372,27 @@ export const BookingCalendar = ({
     setAvailableTimeSlots([]);
     if (date) {
       const slots = getTimeSlots(date, browserTimezone);
-      setAvailableTimeSlots(slots);
+      // filter slots if current date time (hh:mm) is greater than the current date + minimumNotice time
+      const filtered = slots.filter((slot) => {
+        const isValidSlot = isSlotValidWithMinimumNotice({
+          date,
+          minimumNotice: eventTypeSetting?.settings?.minimumNotice,
+          minimumNoticeType: eventTypeSetting?.settings?.minimumNoticeType,
+          slotStartTime: format(slot.utcTime, "HH:mm"),
+          pureFullUtcTime: slot.utcTime,
+          timezone,
+        });
+        return isValidSlot;
+      });
+      setAvailableTimeSlots(filtered);
     }
-  }, [getTimeSlots, date]);
+  }, [
+    getTimeSlots,
+    date,
+    eventTypeSetting?.settings?.minimumNotice,
+    eventTypeSetting?.settings?.minimumNoticeType,
+    timezone,
+  ]);
 
   // Navigate to next month if no slots are available on the current month
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -644,7 +663,7 @@ export const BookingCalendar = ({
             <CenterColumn
               bg="background"
               padding={[0, 0, "24px"]}
-              height={["440px", "440px", "440px", "100%"]}
+              height={["auto", "auto", "auto", "100%"]}
               flexGrow={1}
               justifyContent="center"
             >
@@ -705,7 +724,9 @@ export const BookingCalendar = ({
                   </TabsHeader>
                 )}
                 <TabsContent>
-                  <TimeSlotContainer>
+                  <TimeSlotContainer
+                    height={["440px", "440px", "440px", "100%"]}
+                  >
                     {availableTimeSlots.length > 0 ? (
                       availableTimeSlots?.map((time, index) => (
                         <CenterRow key={index} width="100%" gap={"8px"}>

@@ -57,7 +57,7 @@ export const useGetTimeSlots = ({
         selectedDate,
         userTimezone
       );
-      const dayOfWeek = selectedDateInAvailabilityTZ.getDay();
+      const dayOfWeek = selectedDate.getDay();
 
       // Check if there's a date override
       const dateOverride = availability.dateOverrides?.find(

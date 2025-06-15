@@ -184,3 +184,36 @@ export const createRoundRobin = async ({
     setCreatingRoundRobinBooking(false);
   }
 };
+
+export const convertUTCTimeToZonedTime = ({
+  timezone,
+  slotStartTime,
+}: {
+  timezone: string;
+  slotStartTime: string;
+}) => {
+  // import { utcToZonedTime, format } from 'date-fns-tz';
+
+  // Given:
+  const today = new Date(); // or any specific date you want
+
+  // 1. Create a UTC Date from today's date + slotStartTime
+  const [hour, minute] = slotStartTime.split(":").map(Number);
+  const slotInUTC = new Date(
+    Date.UTC(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      hour,
+      minute
+    )
+  );
+
+  // 2. Convert it to user's timezone
+  const slotInUserTZ = toZonedTime(slotInUTC, timezone);
+
+  // 3. (Optional) Format to readable time string in user's timezone
+  const formatted = format(slotInUserTZ, "HH:mm", { timeZone: timezone });
+
+  return formatted;
+};

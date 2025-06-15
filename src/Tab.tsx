@@ -65,7 +65,7 @@ export const TabsContent = styled.div`
   }
 `;
 
-export const TimeSlotContainer = styled.div`
+export const TimeSlotContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

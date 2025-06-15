@@ -73,4 +73,8 @@ type CreateRoundRobinProps = {
     db: Pocketbase;
 };
 export declare const createRoundRobin: ({ body, setCreatingRoundRobinBooking, onError, onSuccess, db, }: CreateRoundRobinProps) => Promise<Booking>;
+export declare const convertUTCTimeToZonedTime: ({ timezone, slotStartTime, }: {
+    timezone: string;
+    slotStartTime: string;
+}) => string;
 export {};
