@@ -140,7 +140,10 @@ export const BookingCalendar = ({
       if (!slots.length) {
         return false;
       }
-      if (date <= new Date(new Date().setHours(0, 0, 0, 0))) {
+      if (
+        date <= new Date(new Date().setHours(0, 0, 0, 0)) &&
+        eventTypeSetting?.settings?.minimumNotice
+      ) {
         return false;
       }
 
