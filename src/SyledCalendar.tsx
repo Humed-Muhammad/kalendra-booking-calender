@@ -123,20 +123,23 @@ const StyledDayPicker = styled(DayPicker)`
     color: ${(props: any) => props.theme.colors.daySelectedText};
     font-weight: bold;
   }
-
   .rdp-head_cell {
     color: ${(props: any) => props.theme.colors.text};
   }
 
   .rdp-day_disabled {
-    color: ${(props: any) => props.theme.colors.text};
+    color: ${(props: any) =>
+      props.theme.colors.dayDisabledColor ?? props.theme.colors.text};
     opacity: 0.5;
     cursor: default;
-    background-color: ${(props: any) => props.theme.colors.transparent};
+    background-color: ${(props: any) =>
+      props.theme.colors.dayDisabledBg ?? props.theme.colors.transparent};
     border: none;
     &:hover {
-      background-color: ${(props: any) => props.theme.colors.transparent};
-      color: ${(props: any) => props.theme.colors.text};
+      background-color: ${(props: any) =>
+        props.theme.colors.dayDisabledBg ?? props.theme.colors.transparent};
+      color: ${(props: any) =>
+        props.theme.colors.dayDisabledColor ?? props.theme.colors.text};
       border: none;
     }
   }

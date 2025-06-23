@@ -11,7 +11,8 @@ export declare const lightTheme: {
         dayHoverText: string;
         daySelectedBg: string;
         daySelectedText: string;
-        dayDisabled: string;
+        dayDisabledColor: string;
+        dayDisabledBg: string;
         dayRangeMiddle: string;
         icon: string;
         transparent: string;
