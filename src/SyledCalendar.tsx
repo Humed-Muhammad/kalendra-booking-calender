@@ -105,8 +105,10 @@ const StyledDayPicker = styled(DayPicker)`
     font-size: 1.125rem;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
-    color: ${(props: any) => props.theme.colors.text};
-    background-color: ${(props: any) => props.theme.colors.dayBg};
+    color: ${(props: any) =>
+      props.theme.colors.dayActiveColor ?? props.theme.colors.text};
+    background-color: ${(props: any) =>
+      props.theme.colors.dayActiveBg ?? props.theme.colors.dayBg};
     border: 1px solid ${(props: any) => props.theme.colors.transparent};
     &:hover {
       border: 1px solid ${(props: any) => props.theme.colors.dayHoverBg};

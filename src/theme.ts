@@ -13,6 +13,8 @@ export const lightTheme = {
     daySelectedText: "#f8fafc",
     dayDisabledColor: "#cbd5e1",
     dayDisabledBg: "#cbd5e1",
+    dayActiveColor: "black",
+    dayActiveBg: "#cbd5e1",
     dayRangeMiddle: "#475569",
     icon: "#475569",
     transparent: "transparent",

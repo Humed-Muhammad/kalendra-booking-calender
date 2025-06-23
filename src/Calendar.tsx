@@ -140,11 +140,12 @@ export const BookingCalendar = ({
       if (!slots.length) {
         return false;
       }
-      if (
-        date <= new Date(new Date().setHours(0, 0, 0, 0)) &&
-        eventTypeSetting?.settings?.minimumNotice
-      ) {
-        return false;
+      if (eventTypeSetting?.settings?.minimumNotice) {
+        if (date <= new Date(new Date().setHours(0, 0, 0, 0))) {
+          return false;
+        }
+      } else {
+        return date >= new Date(new Date().setHours(0, 0, 0, 0));
       }
 
       if (!availability) return false;
@@ -166,11 +167,6 @@ export const BookingCalendar = ({
       }
 
       // Otherwise check the regular weekly availability
-      let smallestDay = date.getDate();
-      if (smallestDay < date.getDate()) {
-        smallestDay = date.getDate();
-      }
-      // console.log(date.getDate(), new Date().getDate());
       if (
         eventTypeSetting?.settings?.minimumNotice &&
         date.getDate() == new Date().getDate() + 1
