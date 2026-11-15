@@ -10,6 +10,6 @@ type Props = {
     date?: Date;
     disabled?: boolean;
 };
-/** Timezone picker: city, region and the GMT offset on the booked day, sorted by offset, searchable. */
+/** Timezone picker: country, city and the GMT offset on the booked day; A–Z by country, searchable. */
 export declare const TimezonePicker: ({ value, onChange, date, disabled }: Props) => JSX.Element;
 export {};

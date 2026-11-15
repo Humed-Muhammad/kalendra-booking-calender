@@ -27,6 +27,10 @@ import { KalendraCalendar } from "kalendra";
 />;
 ```
 
+## Timezone
+
+The calendar starts in the browser's timezone (or the `timezone` prop). Its picker lists the tzdata zones A–Z by country, shows each zone's GMT offset on the day being booked (so daylight saving is included, e.g. Beirut GMT+2 in November, GMT+3 in April), and searches by country, city or offset. The zone-to-country table (`src/timezoneCountries.ts`) is generated from tzdata `zone.tab`.
+
 ## Reschedule a booking
 
 ```tsx

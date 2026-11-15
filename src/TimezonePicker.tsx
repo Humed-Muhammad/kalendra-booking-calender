@@ -9,12 +9,14 @@ import styled from "styled-components";
 import { format } from "date-fns";
 import { getTimezoneOffset } from "date-fns-tz";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { timezones } from "./timezone";
+import { zoneCountries } from "./timezoneCountries";
 
 type Zone = {
   value: string;
   city: string;
-  region: string;
+  country: string;
+  /** City, plus tzdb's note where a country has several zones ("New York · Eastern (most areas)"). */
+  detail: string;
   offsetMinutes: number;
   offsetLabel: string;
   searchText: string;
@@ -36,21 +38,55 @@ export const zoneOffsetMinutes = (timezone: string, date: Date) =>
 
 const normalize = (text: string) => text.toLowerCase().replace(/_/g, " ");
 
+const UTC = "UTC";
+
+// Country names from the browser ("ET" -> "Ethiopia"); the code itself where unsupported.
+const regionNames = (() => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" });
+  } catch {
+    return undefined;
+  }
+})();
+
+const countryName = (code: string) => {
+  try {
+    return regionNames?.of(code) ?? code;
+  } catch {
+    return code;
+  }
+};
+
 const describeZone = (value: string, date: Date): Zone | null => {
   const offsetMinutes = zoneOffsetMinutes(value, date);
   // A zone this browser's time data doesn't know.
   if (Number.isNaN(offsetMinutes)) return null;
   const parts = value.split("/");
   const city = parts[parts.length - 1].replace(/_/g, " ");
-  const region = parts.slice(0, -1).join(" / ").replace(/_/g, " ");
+  const known = zoneCountries[value];
+  // A zone outside zone.tab (an alias such as Asia/Calcutta) falls back to its region.
+  const country = known
+    ? countryName(known.country)
+    : value === UTC
+      ? UTC
+      : parts.slice(0, -1).join(" / ").replace(/_/g, " ") || city;
+  const detail =
+    value === UTC
+      ? "Coordinated Universal Time"
+      : known?.note
+        ? `${city} · ${known.note}`
+        : city;
   const offsetLabel = formatGMTOffset(offsetMinutes);
   return {
     value,
     city,
-    region,
+    country,
+    detail,
     offsetMinutes,
     offsetLabel,
-    searchText: normalize(`${value} ${offsetLabel} UTC${offsetLabel.slice(3)}`),
+    searchText: normalize(
+      `${value} ${country} ${known?.note ?? ""} ${offsetLabel} UTC${offsetLabel.slice(3)}`,
+    ),
   };
 };
 
@@ -73,6 +109,11 @@ const browserTimezone = () => {
   }
 };
 
+const LIST_MAX_HEIGHT = 280;
+const LIST_MIN_HEIGHT = 120;
+// Search box, footer and the gap to the trigger.
+const POPOVER_CHROME = 110;
+
 type Props = {
   value: string;
   onChange: (timezone: string) => void;
@@ -81,7 +122,7 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Timezone picker: city, region and the GMT offset on the booked day, sorted by offset, searchable. */
+/** Timezone picker: country, city and the GMT offset on the booked day; A–Z by country, searchable. */
 export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -96,23 +137,25 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
 
   const day = date ?? new Date();
   const dayKey = day.toDateString();
+  const yours = browserTimezone();
   const zones = useMemo(() => {
-    const values = timezones.map((zone) => zone.value);
-    // The current value may not be in the list (e.g. a zone from the browser).
-    if (value && !values.includes(value)) values.push(value);
+    const values = [...Object.keys(zoneCountries), UTC];
+    // The picked and the viewer's zones may be aliases outside zone.tab.
+    for (const extra of [value, yours]) {
+      if (extra && !values.includes(extra)) values.push(extra);
+    }
     return values
       .map((zoneValue) => describeZone(zoneValue, day))
       .filter((zone): zone is Zone => zone !== null)
       .sort(
         (a, b) =>
-          a.offsetMinutes - b.offsetMinutes || a.city.localeCompare(b.city),
+          a.country.localeCompare(b.country) || a.city.localeCompare(b.city),
       );
     // Recompute only when the day (not the Date instance) changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayKey, value]);
+  }, [dayKey, value, yours]);
 
   const selected = zones.find((zone) => zone.value === value);
-  const yours = browserTimezone();
 
   const rows = useMemo<Row[]>(() => {
     const terms = normalize(query).trim().split(/\s+/).filter(Boolean);
@@ -131,6 +174,20 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
       ...zones.map((zone) => ({ zone })),
     ];
   }, [query, zones, yours, value]);
+
+  // Opens upward when there's more room above; the list then fits the room it gets.
+  const [placement, setPlacement] = useState({ up: false, listMaxHeight: LIST_MAX_HEIGHT });
+  const open = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const below = window.innerHeight - rect.bottom;
+      const above = rect.top;
+      const up = below < LIST_MAX_HEIGHT + POPOVER_CHROME && above > below;
+      const room = (up ? above : below) - POPOVER_CHROME;
+      setPlacement({ up, listMaxHeight: Math.max(LIST_MIN_HEIGHT, Math.min(LIST_MAX_HEIGHT, room)) });
+    }
+    setIsOpen(true);
+  };
 
   const close = (refocus = false) => {
     setIsOpen(false);
@@ -198,8 +255,8 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        title={value}
-        onClick={() => (isOpen ? close() : setIsOpen(true))}
+        title={selected ? `${selected.city}, ${selected.country} (${value})` : value}
+        onClick={() => (isOpen ? close() : open())}
       >
         <TriggerCity>{selected?.city ?? (value || "Pick a timezone")}</TriggerCity>
         {selected && <Offset>{selected.offsetLabel}</Offset>}
@@ -207,7 +264,7 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
       </Trigger>
 
       {isOpen && (
-        <Popover>
+        <Popover $up={placement.up}>
           <SearchBox>
             <Search aria-hidden />
             <input
@@ -218,7 +275,7 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
               aria-activedescendant={
                 rows[activeIndex] ? `${listId}-${activeIndex}` : undefined
               }
-              placeholder="Search city or GMT offset"
+              placeholder="Country, city or GMT offset"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={onSearchKeyDown}
@@ -226,7 +283,7 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
           </SearchBox>
 
           {rows.length ? (
-            <List ref={listRef} id={listId} role="listbox">
+            <List ref={listRef} id={listId} role="listbox" style={{ maxHeight: placement.listMaxHeight }}>
               {rows.map((row, index) => {
                 const isSelected = row.zone.value === value;
                 return (
@@ -243,11 +300,9 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
                     onClick={() => pick(row.zone)}
                   >
                     <OptionText>
-                      <span>{row.zone.city}</span>
+                      <span>{row.zone.country}</span>
                       <small>
-                        {row.isYours
-                          ? `Your timezone · ${row.zone.region}`
-                          : row.zone.region}
+                        {row.isYours ? `Your timezone · ${row.zone.detail}` : row.zone.detail}
                       </small>
                     </OptionText>
                     <Offset>{row.zone.offsetLabel}</Offset>
@@ -262,7 +317,7 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
             <Empty>No timezone matches “{query}”</Empty>
           )}
 
-          <Footer>Offsets for {format(day, "EEE, d MMM yyyy")}, daylight saving included</Footer>
+          <Footer>Offsets on {format(day, "d MMM yyyy")}, daylight saving included</Footer>
         </Popover>
       )}
     </Root>
@@ -326,9 +381,9 @@ const Chevron = styled(ChevronDown)<{ $open: boolean }>`
   transition: transform 0.2s ease;
 `;
 
-const Popover = styled.div`
+const Popover = styled.div<{ $up: boolean }>`
   position: absolute;
-  top: calc(100% + 8px);
+  ${(p) => (p.$up ? "bottom" : "top")}: calc(100% + 8px);
   left: 0;
   z-index: 1000;
   display: flex;
@@ -376,7 +431,6 @@ const SearchBox = styled.label`
 
 const List = styled.ul`
   position: relative;
-  max-height: 280px;
   margin: 0;
   padding: 0 4px 4px;
   overflow-y: auto;
