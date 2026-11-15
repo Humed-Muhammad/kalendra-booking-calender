@@ -1,123 +1,167 @@
+import React, { useId } from "react";
 import styled from "styled-components";
-import { Box, Text } from "./Core/index";
-import { Button } from "./Core/Button/Button";
-import { ContentType } from "./types";
+import { motion } from "framer-motion";
+import type { ContentType } from "./types/type";
 
-export const TabsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 100%;
-  width: 100%;
+/* ---------- Segmented 12hr / 24hr toggle ---------- */
+
+const Segmented = styled.div`
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: ${({ theme }) => theme.colors.subtle};
 `;
 
-export const TabsHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 40px;
-  gap: 0.5rem;
-`;
-
-export const Title = styled.p`
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: var(--foreground);
-  min-width: fit-content;
-`;
-
-export const TabsList = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  border: 1px solid ${({ theme }: any) => theme.colors.border};
-  border-radius: 6px;
-  padding: 4px;
-  scale: 0.9;
-`;
-
-export const TabTrigger = styled(Button)<{ active: boolean }>`
-  padding: 6px 10px;
-  border-radius: 0.25rem;
-  font-weight: 600;
+const SegmentButton = styled.button<{ $active: boolean }>`
+  position: relative;
+  z-index: 0;
   border: none;
-  background: ${({ active, theme }: any) =>
-    active ? theme.colors.dayBg : "transparent"};
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.text : theme.colors.textMuted};
+  transition: color 0.2s ease;
   &:hover {
-    background: ${({ theme }: any) => theme.colors.lightGray};
-    color: ${({ theme }: any) => theme.colors.text};
+    color: ${({ theme }) => theme.colors.text};
+  }
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 1px;
   }
 `;
 
-export const TabsContent = styled.div`
-  min-height: calc(400px - 100px);
-  width: 100%;
-  ::-webkit-scrollbar {
-    width: 0.25rem;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: ${(props: any) => props.theme.colors.lightGray};
-    border-radius: 0.25rem;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent !important;
-  }
-`;
-
-export const TimeSlotContainer = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  overflow-y: scroll;
-
-  max-height: 100%;
-  align-items: center;
-  padding: 0 1.5rem;
-`;
-
-export const TimeSlot = styled(Box)<{ selected?: boolean }>`
-  display: flex;
-  border: 1px solid ${(props: any) => props.theme.colors.lightGray};
-  border-radius: 6px;
-  padding: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  &:hover {
-    background: ${(props: any) =>
-      !props.selected
-        ? props.theme.colors.dayBg
-        : props.theme.colors.lightGray};
-  }
-`;
-
-export const NoSlotsMessage = styled.div`
-  text-align: center;
+const Pill = styled(motion.span)`
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 7px;
+  background: ${({ theme }) => theme.colors.toggleActive};
+  box-shadow: ${({ theme }) => theme.shadows.toggle};
 `;
 
 type Props = {
   options: string[];
   activeTab: string;
   onChange: (tab: string) => void;
-  content: ContentType | undefined;
+  content?: ContentType | undefined;
 };
 export const Tab = ({ options, activeTab, content, onChange }: Props) => {
+  const id = useId();
   return (
-    <TabsList>
-      {options?.map((option) => (
-        <TabTrigger
-          key={option}
-          active={activeTab === option}
-          onClick={() => onChange(option)}
-        >
-          <Text color="inherit">
+    <Segmented role="tablist">
+      {options.map((option) => {
+        const active = activeTab === option;
+        return (
+          <SegmentButton
+            key={option}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            $active={active}
+            onClick={() => onChange(option)}
+          >
+            {active && (
+              <Pill
+                layoutId={`segment-pill-${id}`}
+                transition={{ type: "spring", stiffness: 520, damping: 40 }}
+              />
+            )}
             {content?.[option as keyof ContentType] ?? option}
-          </Text>
-        </TabTrigger>
-      ))}
-    </TabsList>
+          </SegmentButton>
+        );
+      })}
+    </Segmented>
   );
 };
+
+/* ---------- Time slots ---------- */
+
+export const SlotRow = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
+export const SlotButton = styled.button<{ $selected?: boolean }>`
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid
+    ${({ $selected, theme }) =>
+      $selected ? theme.colors.available : theme.colors.border};
+  background: ${({ $selected, theme }) =>
+    $selected ? theme.colors.available : theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
+  }
+`;
+
+export const ConfirmButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 8px);
+  height: 44px;
+  margin-inline-start: 8px;
+  border: none;
+  border-radius: 10px;
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.primaryText};
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.colors.primaryHover};
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
+  }
+`;
+
+/** The time text inside a slot; rolls vertically when the time changes. */
+export const SlotLabel = styled(motion.span)`
+  display: block;
+  white-space: nowrap;
+  will-change: transform, opacity;
+`;

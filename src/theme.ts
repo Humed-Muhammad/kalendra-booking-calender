@@ -1,7 +1,6 @@
 export const lightTheme = {
   breakpoints: ["320px", "576px", "768px", "992px", "1200px", "1400px"],
   colors: {
-    rootLoaderColor: "#ffa516",
     background: "white",
     border: "#cbd5e1",
     lightGray: "#cbd5e1",
@@ -11,16 +10,24 @@ export const lightTheme = {
     dayHoverText: "white",
     daySelectedBg: "#1e293b",
     daySelectedText: "#f8fafc",
-    dayDisabledColor: "#cbd5e1",
-    dayDisabledBg: "#cbd5e1",
-    dayActiveColor: "black",
-    dayActiveBg: "#cbd5e1",
+    dayDisabled: "#cbd5e1",
     dayRangeMiddle: "#475569",
     icon: "#475569",
     transparent: "transparent",
     dayBg: "#cbd5e1",
     error: "#f87171",
-    currentDayIndicator: "#f87171",
+    todayIndicator: "#1e293b",
+    // Premium booker tokens (same slate palette)
+    surface: "#f8fafc",
+    subtle: "#f1f5f9",
+    available: "#e2e8f0",
+    availableHover: "#cbd5e1",
+    textMuted: "#64748b",
+    textSubtle: "#94a3b8",
+    primary: "#1e293b",
+    primaryHover: "#334155",
+    primaryText: "#f8fafc",
+    toggleActive: "#ffffff",
   },
   shadows: {
     base: "0px 4px 4px 0px #00000040",
@@ -31,13 +38,15 @@ export const lightTheme = {
     lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
     xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
     none: "none",
+    card: "0 1px 2px 0 rgb(15 23 42 / 0.04), 0 12px 32px -8px rgb(15 23 42 / 0.10)",
+    pop: "0 6px 16px -4px rgb(15 23 42 / 0.35)",
+    toggle: "0 1px 2px 0 rgb(15 23 42 / 0.10), 0 1px 1px 0 rgb(15 23 42 / 0.04)",
   },
 };
 
 export const darkTheme = {
   breakpoints: ["320px", "576px", "768px", "992px", "1200px", "1400px"],
   colors: {
-    rootLoaderColor: "#ffa516",
     background: "#171717", // Dark background
     border: "#333", // Lighter border for contrast
     lightGray: "#3b3b4f", // Lighter gray for contrast
@@ -52,9 +61,19 @@ export const darkTheme = {
     icon: "#cbd5e1", // Light icons
     transparent: "transparent",
     dayBg: "#27272A", // Slightly lighter than the
-    dayColor: "#f8fafc",
     error: "#f87171",
-    currentDayIndicator: "#f87171",
+    todayIndicator: "#fff",
+    // Premium booker tokens (same palette, dark)
+    surface: "#1c1c1c",
+    subtle: "#232326",
+    available: "#27272A",
+    availableHover: "#3f3f46",
+    textMuted: "#a1a1aa",
+    textSubtle: "#71717a",
+    primary: "#f8fafc",
+    primaryHover: "#e2e8f0",
+    primaryText: "#1e293b",
+    toggleActive: "#3f3f46",
   },
   shadows: {
     base: "0px 4px 4px 0px #00000040",
@@ -65,5 +84,8 @@ export const darkTheme = {
     lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
     xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
     none: "none",
+    card: "0 1px 2px 0 rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.5)",
+    pop: "0 6px 16px -4px rgb(0 0 0 / 0.6)",
+    toggle: "0 1px 2px 0 rgb(0 0 0 / 0.4)",
   },
 };

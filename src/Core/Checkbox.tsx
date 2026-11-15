@@ -10,11 +10,11 @@ export const Checkbox = styled.input.attrs({ type: "checkbox" })`
   position: relative;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  cursor: ${(props: any) => (props.disabled ? "not-allowed" : "pointer")};
-  opacity: ${(props: any) => (props.disabled ? 0.5 : 1)};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
   &:checked {
-    background-color: ${(props: any) => props.theme.colors.dayBg};
+    background-color: ${(props) => props.theme.colors.dayBg};
     border-color: darkgray;
   }
 

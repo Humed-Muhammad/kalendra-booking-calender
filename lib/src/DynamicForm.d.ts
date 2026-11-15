@@ -1,6 +1,5 @@
 /// <reference types="react" />
-import { DynamicFormTypes } from "./types/type";
-import { ContentType } from "./types";
+import type { ContentType, DynamicFormTypes } from "./types/type";
 type DynamicFormProps = {
     onBack: () => void;
     fields: Array<DynamicFormTypes>;
@@ -8,6 +7,7 @@ type DynamicFormProps = {
     onSubmit: (values: any) => void;
     isLoading: boolean;
     content?: ContentType | undefined;
+    setBookingQuestions: (questions: any) => void;
 };
-export declare const DynamicForm: ({ onBack, onSubmit, isLoading, fields, bookingQuestions, content, }: DynamicFormProps) => JSX.Element;
+export declare const DynamicForm: ({ onBack, onSubmit, setBookingQuestions, isLoading, fields, bookingQuestions, content, }: DynamicFormProps) => JSX.Element;
 export {};

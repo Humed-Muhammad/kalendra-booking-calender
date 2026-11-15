@@ -1,6 +1,43 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { Booking } from "./types";
-import Pocketbase from "pocketbase";
+import type Pocketbase from "pocketbase";
+import type { Booking, BookingDraft, Slot } from "./types";
+
+export const collectionNames = {
+  users: "users",
+};
+
+export const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const formatToTimeZone = (time: string, timezone?: string | undefined, formatType?: string) => {
+  if (!time) return "";
+  const formattedTime = toZonedTime(time, timezone ?? browserTimezone);
+  return format(formattedTime, formatType ?? "EEEE, MMMM d, yyyy, h:mm a");
+};
+
+/** Books a round-robin slot with one of the members free at that time. */
+export const createRoundRobin = async ({
+  client,
+  body,
+  setCreatingRoundRobinBooking,
+  onError,
+  onSuccess,
+}: {
+  client: Pocketbase;
+  body: BookingDraft & { users: Slot["users"] };
+  setCreatingRoundRobinBooking: (value: boolean) => void;
+  onError?: (error: unknown) => void;
+  onSuccess?: (booking: Booking | undefined) => void;
+}) => {
+  try {
+    setCreatingRoundRobinBooking(true);
+    const response = await client.send<Booking>("/event/book/round-robin", { method: "POST", body });
+    onSuccess?.(response);
+  } catch (error: any) {
+    onError?.(error?.response || error);
+  } finally {
+    setCreatingRoundRobinBooking(false);
+  }
+};
 
 type FormatSlotType = {
   minutes: number;
@@ -17,7 +54,7 @@ export const formatSlotMinutes = ({ minutes, hr, hrs, m }: FormatSlotType) => {
       return hours === 1 ? `${hours}${hr ?? "hr"}` : `${hours}${hrs ?? "hrs"}`;
     } else {
       return `${hours}${
-        hours === 1 ? hr ?? "hr" : hrs ?? "hrs"
+        hours === 1 ? (hr ?? "hr") : (hrs ?? "hrs")
       } ${remainingMinutes}${m ?? "m"}`;
     }
   }
@@ -25,164 +62,18 @@ export const formatSlotMinutes = ({ minutes, hr, hrs, m }: FormatSlotType) => {
   return `${minutes}${m ?? "m"}`;
 };
 
-export function getGMTOffset(timezone: string) {
-  const now = new Date();
-  if (!timezone) return "GMT";
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    timeZoneName: "shortOffset",
-  });
-
-  const parts = formatter.formatToParts(now);
-  const offsetPart = parts.find((part) => part.type === "timeZoneName");
-
-  return offsetPart ? offsetPart.value.replace("UTC", "GMT") : "GMT";
-}
-
 export const getImage = ({
+  baseUrl,
   imageName,
   collectionName,
   recordId,
-  pbUrl,
 }: {
+  baseUrl: string;
   imageName: string;
   collectionName: string;
   recordId: string;
-  pbUrl: string;
 }) => {
-  return `${pbUrl}/api/files/${collectionName}/${recordId}/${imageName}`;
-};
-
-export const collectionNames = {
-  organizations: "organizations",
-  invites: "invites",
-  event_types: "event_types",
-  event_type_settings: "event_type_settings",
-  availability: "availability",
-  organization_membership: "organization_membership",
-  teams: "teams",
-  bookings: "bookings",
-  users: "users",
-  webhooks: "webhooks",
-  api_keys: "api_keys",
-};
-
-export const statusColors = {
-  success: {
-    bg: "#D3FBAF",
-    color: "#177F11",
-  },
-  info: { bg: "rgba(184, 233, 245, 0.43)", color: "#0F3844" },
-  warning: { bg: "#F5EA6E", color: "#0F3844" },
-  error: {
-    bg: "#FEEAEE",
-    color: "#F12A4E",
-  },
-  stale: {
-    bg: "#D3FBAF",
-    color: "#02151A",
-  },
-};
-
-export const generateInviteToken = () => {
-  return crypto.randomUUID();
-};
-
-// Function that generate human readable user name from the email
-export const generateUsernameFromEmail = (email: string): string => {
-  // Remove @ and replace dots/special chars with hyphens
-  const username = email
-    .toLowerCase()
-    .replace(/@/g, "-")
-    .replace(/\./g, "-")
-    .replace(/[^a-z0-9-]/g, "-")
-    // Remove consecutive hyphens
-    .replace(/-+/g, "-")
-    // Remove leading/trailing hyphens
-    .replace(/^-+|-+$/g, "");
-
-  return username;
-};
-
-type ExpandedRecord = {
-  expand?: Record<string, any>;
-  [key: string]: any;
-};
-
-export const flattenPocketBaseData = <T>(
-  data: ExpandedRecord | ExpandedRecord[] | null
-): T | T[] => {
-  if (!data) return [] as T[];
-
-  const flatten = (item: ExpandedRecord): any => {
-    const result = { ...item };
-
-    if (result.expand) {
-      Object.entries(result.expand).forEach(([key, value]) => {
-        result[key] = Array.isArray(value)
-          ? value?.map((v) => flatten(v))
-          : value && typeof value === "object"
-          ? flatten(value)
-          : value;
-      });
-      delete result.expand;
-    }
-
-    return result;
-  };
-  return Array.isArray(data)
-    ? data?.map((item) => flatten(item))
-    : flatten(data);
-};
-
-export const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-export const formatToTimeZone = (
-  time: string,
-  timezone?: string | undefined,
-  formatType?: string
-) => {
-  if (!time) return "";
-  const formattedTime = toZonedTime(time, timezone ?? browserTimezone);
-  return format(formattedTime, formatType ?? "EEEE, MMMM d, yyyy, h:mm a");
-};
-
-export const minimumNoticeTypeValue = {
-  minutes: "minutes",
-  hours: "hours",
-  days: "days",
-  weeks: "weeks",
-  months: "months",
-};
-
-type CreateRoundRobinProps = {
-  body: any;
-  setCreatingRoundRobinBooking: (value: boolean) => void;
-  onSuccess?: (response: Booking) => void;
-  onError?: (error: any) => void;
-  db: Pocketbase;
-};
-export const createRoundRobin = async ({
-  body,
-  setCreatingRoundRobinBooking,
-  onError,
-  onSuccess,
-  db,
-}: CreateRoundRobinProps) => {
-  try {
-    setCreatingRoundRobinBooking(true);
-    const response = await db?.send<Booking>("/round-robin", {
-      method: "POST",
-      body,
-    });
-    onSuccess?.(response!);
-    return response;
-  } catch (error) {
-    onError?.(error);
-    throw error;
-  } finally {
-    setCreatingRoundRobinBooking(false);
-  }
+  return `${baseUrl}/api/files/${collectionName}/${recordId}/${imageName}`;
 };
 
 export const convertUTCTimeToZonedTime = ({
@@ -205,8 +96,8 @@ export const convertUTCTimeToZonedTime = ({
       today.getMonth(),
       today.getDate(),
       hour,
-      minute
-    )
+      minute,
+    ),
   );
 
   // 2. Convert it to user's timezone

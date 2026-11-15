@@ -1,6 +1,6 @@
 {
   "name": "kalendra",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "main": "./lib/src/index.js",
   "module": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "@open-wc/building-rollup": "^2.0.2",
-    "@reduxjs/toolkit": "^2.0.1",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
@@ -47,7 +46,6 @@
     "react": "^18.2.0",
     "react-day-picker": "8.10.1",
     "react-phone-input-2": "^2.15.1",
-    "react-redux": "^9.1.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.78.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -57,12 +55,17 @@
     "styled-components": "^6.1.17",
     "styled-system": "^5.1.5",
     "typescript": "^5.3.3",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "framer-motion": "^11.16.1",
+    "react-color": "^2.19.3",
+    "@types/react-color": "^3.0.12",
+    "react-dom": "^18.2.0",
+    "@types/react-dom": "^18.0.11"
   },
   "peerDependencies": {
-    "react": ">= 17.0.2"
+    "react": ">=17.0.2",
+    "react-dom": ">=17.0.2",
+    "styled-components": ">=6.1.0"
   },
-  "dependencies": {
-    "lodash": "^4.17.21"
-  }
+  "description": "Kalendra's booking calendar: book an event or reschedule a booking."
 }

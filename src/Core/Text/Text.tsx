@@ -4,8 +4,8 @@ import type { TextProps } from "./types";
 import { commonComposes } from "../common";
 
 export const Text = styled("p")<TextProps>(
-  (props: any) => ({
-    color: props.color || props.theme.colors.text,
+  (props) => ({
+    color: (props.color as string) || props.theme.colors.text,
     //
     // Create a truncate implementation if props.truncate is true
     ...(props.truncate && {

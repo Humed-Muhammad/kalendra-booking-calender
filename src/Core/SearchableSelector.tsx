@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import { Box, CenterRow } from "./Box/Box";
 import { Text } from "./Text/Text";
 import { CenterColumn } from "./Box/Box";
@@ -8,13 +8,13 @@ import styled from "styled-components";
 import { commonComposes } from "./common";
 
 const StyledChevronDown = styled(ChevronDown)`
-  color: ${(props: any) => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
   width: 20px;
   transition: all 0.2s ease-in-out;
   ${commonComposes()}
 `;
 const StyledChevronUp = styled(ChevronUp)`
-  color: ${(props: any) => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
   width: 20px;
   transition: all 0.2s ease-in-out;
   ${commonComposes()}
@@ -62,7 +62,7 @@ export const SearchableSelector = ({
       <Box
         bg="background"
         // border="1px solid gray"
-        borderRadius={"4px"}
+        borderRadius={4}
         cursor={disabled ? "not-allowed" : "pointer"}
         onClick={() => {
           if (disabled) return;
@@ -90,11 +90,10 @@ export const SearchableSelector = ({
           border="1px solid"
           borderColor="border"
           hideScrollBar
-          borderRadius={"4px"}
-          // width="100%"
+          borderRadius={4}
           width={"200px"}
           mt={1}
-          zIndex={99999999}
+          zIndex={1000}
           maxHeight="300px"
           overflowY="scroll"
           overflowX="hidden"
@@ -123,7 +122,7 @@ export const SearchableSelector = ({
           </Box>
           <CenterColumn px={1}>
             {filteredOptions.length > 0 ? (
-              filteredOptions?.map((option) => (
+              filteredOptions.map((option) => (
                 <Box
                   key={option.value}
                   padding={2}
@@ -133,7 +132,7 @@ export const SearchableSelector = ({
                     onChange(option.value);
                     setIsOpen(false);
                   }}
-                  borderRadius={"4px"}
+                  borderRadius={4}
                 >
                   <Text variant="light" style={{ wordWrap: "break-word" }}>
                     {option.label ?? option.value}{" "}

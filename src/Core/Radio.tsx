@@ -12,7 +12,7 @@ export const Radio = styled.input.attrs({ type: "radio" })`
   transition: all 0.2s ease-in-out;
 
   &:checked {
-    background-color: ${(props: any) => props.theme.colors.dayBg};
+    background-color: ${(props) => props.theme.colors.dayBg};
     border-color: darkgray;
   }
 

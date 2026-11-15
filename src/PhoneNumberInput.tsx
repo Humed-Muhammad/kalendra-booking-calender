@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { Box } from "./Core/index";
+import { Box } from "./Core";
+import { useKalendra } from "./context/context";
 
 const Wrapper = styled(Box)`
   display: flex;
@@ -9,7 +10,7 @@ const Wrapper = styled(Box)`
   gap: 8px;
   padding: 2px;
   border: 1px solid;
-  border-color: ${(props: any) => props.theme.colors.border};
+  // border-color: ${(props) => props.theme.colors?.border ?? "#333"};
   border-radius: 6px;
   width: 100%;
 `;
@@ -20,30 +21,63 @@ const Label = styled.label`
   color: #4a4a4a;
 `;
 
-const StyledPhoneInput = styled(PhoneInput)`
+const StyledPhoneInput = styled(PhoneInput)<{ themeName: string }>`
   .form-control {
     width: 100%;
     font-size: 16px;
     padding-left: 58px;
     border-radius: 0px;
-    border: none !important;
+    border: none;
+    background-color: ${(props) =>
+      props.theme.colors?.background ?? "transparent"};
+    color: ${(props) =>
+      (props.theme.colors?.text ?? props.themeName === "light")
+        ? "#333"
+        : "white"};
     transition: border 0.2s ease, box-shadow 0.2s ease;
-
+    
     &:disabled {
-      background-color: #f5f5f5;
       cursor: not-allowed;
     }
   }
 
-  .flag-dropdown {
-    // background-color: white;
+  .flag-dropdown,
+  .country-list {
+    background-color: ${(props) =>
+      (props.theme.colors?.background ?? props.themeName === "light")
+        ? "#f0f0f0"
+        : "#222"};
     border: none;
-    // border-radius: 12px 0 0 12px;
+    border-radius: 0px;
+    &:hover {
+      background-color: ${(props) =>
+        (props.theme.colors?.background ?? props.themeName === "light")
+          ? "lightGray"
+          : "#222"};
   }
 
   .country-list {
     z-index: 1000;
   }
+  .country{
+    &:hover {
+      background-color: ${(props) =>
+        (props.theme.colors?.dayBg ?? props.themeName === "light")
+          ? "#f0f0f0"
+          : "#333"};
+    }
+  }
+    .highlight {
+    background-color: ${(props) =>
+      (props.theme.colors?.dayBg ?? props.themeName === "light")
+        ? "lightGray"
+        : "#333"} !important;
+    }
+`;
+
+const HelperText = styled.p`
+  font-size: 13px;
+  color: #777;
 `;
 
 type PhoneNumberInputProps = {
@@ -65,11 +99,19 @@ export const PhoneNumberInput = ({
   value,
   disabled,
   handleChange,
+  values = {},
+  field = {},
 }: PhoneNumberInputProps) => {
+  const { themeMode: theme } = useKalendra();
   return (
-    <Wrapper>
+    <Wrapper
+      style={{
+        borderColor: theme === "light" ? "lightGray" : "#333",
+      }}
+    >
       {label && <Label htmlFor={id}>{label}</Label>}
       <StyledPhoneInput
+        themeName={theme}
         inputProps={{
           id,
           name,
@@ -80,6 +122,10 @@ export const PhoneNumberInput = ({
         value={value}
         onChange={handleChange}
         disabled={disabled}
+        autocompleteSearch
+        countryCodeEditable
+        enableSearch
+        enableLongNumbers
       />
     </Wrapper>
   );

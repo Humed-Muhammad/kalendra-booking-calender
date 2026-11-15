@@ -1,42 +1,6 @@
 export declare const lightTheme: {
     breakpoints: string[];
     colors: {
-        rootLoaderColor: string;
-        background: string;
-        border: string;
-        lightGray: string;
-        text: string;
-        headCell: string;
-        dayHoverBg: string;
-        dayHoverText: string;
-        daySelectedBg: string;
-        daySelectedText: string;
-        dayDisabledColor: string;
-        dayDisabledBg: string;
-        dayActiveColor: string;
-        dayActiveBg: string;
-        dayRangeMiddle: string;
-        icon: string;
-        transparent: string;
-        dayBg: string;
-        error: string;
-        currentDayIndicator: string;
-    };
-    shadows: {
-        base: string;
-        medium: string;
-        normal: string;
-        sm: string;
-        md: string;
-        lg: string;
-        xl: string;
-        none: string;
-    };
-};
-export declare const darkTheme: {
-    breakpoints: string[];
-    colors: {
-        rootLoaderColor: string;
         background: string;
         border: string;
         lightGray: string;
@@ -51,9 +15,18 @@ export declare const darkTheme: {
         icon: string;
         transparent: string;
         dayBg: string;
-        dayColor: string;
         error: string;
-        currentDayIndicator: string;
+        todayIndicator: string;
+        surface: string;
+        subtle: string;
+        available: string;
+        availableHover: string;
+        textMuted: string;
+        textSubtle: string;
+        primary: string;
+        primaryHover: string;
+        primaryText: string;
+        toggleActive: string;
     };
     shadows: {
         base: string;
@@ -64,5 +37,52 @@ export declare const darkTheme: {
         lg: string;
         xl: string;
         none: string;
+        card: string;
+        pop: string;
+        toggle: string;
+    };
+};
+export declare const darkTheme: {
+    breakpoints: string[];
+    colors: {
+        background: string;
+        border: string;
+        lightGray: string;
+        text: string;
+        headCell: string;
+        dayHoverBg: string;
+        dayHoverText: string;
+        daySelectedBg: string;
+        daySelectedText: string;
+        dayDisabled: string;
+        dayRangeMiddle: string;
+        icon: string;
+        transparent: string;
+        dayBg: string;
+        error: string;
+        todayIndicator: string;
+        surface: string;
+        subtle: string;
+        available: string;
+        availableHover: string;
+        textMuted: string;
+        textSubtle: string;
+        primary: string;
+        primaryHover: string;
+        primaryText: string;
+        toggleActive: string;
+    };
+    shadows: {
+        base: string;
+        medium: string;
+        normal: string;
+        sm: string;
+        md: string;
+        lg: string;
+        xl: string;
+        none: string;
+        card: string;
+        pop: string;
+        toggle: string;
     };
 };

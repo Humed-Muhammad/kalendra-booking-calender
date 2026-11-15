@@ -1,26 +1,10 @@
-// Import the DefaultTheme from styled-components
+// The calendar's styled-components theme is the shape of lightTheme (darkTheme matches it).
 import "styled-components";
+import type { lightTheme } from "./src/theme";
 
-// Extend the DefaultTheme interface
+type KalendraTheme = typeof lightTheme;
+
 declare module "styled-components" {
-  export interface DefaultTheme {
-    colors: {
-      background: string;
-      border: string;
-      lightGray: string;
-      text: string;
-      headCell: string;
-      dayHoverBg: string;
-      dayHoverText: string;
-      daySelectedBg: string;
-      daySelectedText: string;
-      dayDisabled: string;
-      dayRangeMiddle: string;
-      icon: string;
-      transparent: string;
-      dayBg: string;
-      error: string;
-    };
-    // Add other theme properties if needed
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface DefaultTheme extends KalendraTheme {}
 }

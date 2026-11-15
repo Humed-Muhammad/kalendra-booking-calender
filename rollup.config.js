@@ -6,6 +6,8 @@ import typescript from "rollup-plugin-typescript2";
 import { terser } from "rollup-plugin-terser";
 import postcss from "rollup-plugin-postcss";
 import autoprefixer from "autoprefixer";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 
 const baseConfig = createBasicConfig();
 
@@ -16,9 +18,14 @@ export default merge(baseConfig, [
       dir: "lib/src",
       format: "esm",
       exports: "named",
+      // Next's App Router must treat the calendar as a client component.
+      banner: '"use client";',
     },
     context: "window",
     plugins: [
+      // Bundles the calendar's own dependencies; peers stay external.
+      nodeResolve({ browser: true, extensions: [".js", ".mjs", ".jsx"] }),
+      commonjs(),
       typescript({
         rollupCommonJSResolveHack: false,
         clean: true,
@@ -26,11 +33,14 @@ export default merge(baseConfig, [
       postcss({
         plugins: [autoprefixer()],
         sourceMap: true,
-        extract: true,
+        // Injected at runtime, so hosts don't have to import a stylesheet.
+        inject: true,
         minimize: true,
       }),
-      terser(),
+      // directives: false keeps the "use client" banner.
+      terser({ compress: { directives: false } }),
     ],
-    external: ["react", "react-dom"],
+    // Peers: the host's single copy (styled-components needs one instance for SSR styles).
+    external: ["react", "react-dom", "react/jsx-runtime", "styled-components"],
   },
 ]);

@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { Booking } from './types';
+import type { Booking } from "./types";
 type Props = {
     booking: Booking | null;
 };

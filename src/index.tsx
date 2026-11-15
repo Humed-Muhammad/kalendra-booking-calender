@@ -1,100 +1,85 @@
-// import { usePocketBaseQuery } from "./hooks/usePocketBase";
-// import { collectionNames } from "./utils";
-// import { EventType } from "./types";
-import { RoundRobinBooking } from "./RoundRobinBooking";
-import { BookingProps } from "./types/type";
-import { NormalBooking } from "./NormalBooking";
-import { KalendraContext, KalendraProvider } from "./context/context";
-import { useContext, useEffect, useState } from "react";
-import { Container } from "./Core/index";
+import type { CSSProperties } from "react";
+import { BookingCalendar, type BookingCalendarProps } from "./Calendar";
+import { KalendraProvider } from "./context/context";
 import { usePocketBaseEndpoint } from "./hooks/usePocketBaseEndpoint";
-import { GetEventTypeRes } from "./types";
-// import { KalendraLoader } from "./icons/KalendraLoader";
+import { EventTypeError } from "./NoEventFoundError";
+import type { GetBookingRes, GetEventTypeRes, ThemeMode } from "./types";
 
-interface Props extends BookingProps {
+export type { Booking, BookingDraft, ThemeMode } from "./types";
+export type { ContentType } from "./types/type";
+export { MeetingScheduled } from "./MeetingScheduled";
+
+export type KalendraCalendarProps = Omit<
+  BookingCalendarProps,
+  "bookingToBeRescheduled" | "orgId" | "userId" | "members" | "isRoundRobin" | "eventTypeId"
+> & {
+  /** Kalendra's PocketBase URL. */
   calenderUrl: string;
-}
+  /** Root of Kalendra's custom routes, when it isn't calenderUrl (a local proxy). */
+  apiUrl?: string;
+  themeMode?: ThemeMode;
+  /** The event to book; not needed when rescheduling. */
+  eventTypeId?: string;
+  /** Books this host; without it a round-robin event picks one. */
+  kalendra_user_id?: string;
+  /** Reschedules this Kalendra booking: its event, host and answers are reused. */
+  bookingToBeRescheduledId?: string;
+  /** Applied to the wrapper around the calendar. */
+  styles?: CSSProperties;
+  LoadingIndicator?: JSX.Element;
+  NoEventError?: JSX.Element;
+};
 
-const BookingCalendar = (props: Props) => {
-  const [initializing, setInitializing] = useState(true);
-  const {
-    data: eventType,
-    isLoading,
-    isError,
-  } = usePocketBaseEndpoint<GetEventTypeRes>({
-    url: `/event-type/single`,
-    options: {
-      method: "POST",
-      body: {
-        eventTypeId: props?.eventTypeId,
-      },
-
-      requestKey: null,
-    },
+const ResolvedCalendar = ({
+  eventTypeId,
+  kalendra_user_id,
+  bookingToBeRescheduledId,
+  LoadingIndicator,
+  NoEventError,
+  ...props
+}: Omit<KalendraCalendarProps, "calenderUrl" | "apiUrl" | "themeMode" | "styles">) => {
+  const rescheduling = usePocketBaseEndpoint<GetBookingRes>({
+    url: "/bookings/get-one",
+    options: { method: "GET", query: { bookingId: bookingToBeRescheduledId }, requestKey: null },
+    skip: !bookingToBeRescheduledId,
   });
-  // const {
-  //   data: eventType,
-  //   isError,
-  //   isLoading,
-  // } = usePocketBaseQuery<EventType>({
-  //   collectionName: collectionNames.event_types,
-  //   id: props.eventTypeId as string,
-  //   skip: !props.eventTypeId,
-  //   options: {
-  //     expand: "members",
-  //   },
-  // });
+  const booking = rescheduling.data?.booking;
+  const resolvedEventTypeId = booking?.eventType ?? eventTypeId;
+  const eventType = usePocketBaseEndpoint<GetEventTypeRes>({
+    url: "/event-type/single",
+    options: { method: "POST", body: { eventTypeId: resolvedEventTypeId }, requestKey: null },
+    skip: !resolvedEventTypeId,
+  });
 
-  const { setPbUrl } = useContext(KalendraContext);
-
-  useEffect(() => {
-    setPbUrl?.(props.calenderUrl);
-  }, [props.calenderUrl]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setInitializing(false);
-    }, 600);
-  }, []);
-
-  if (isLoading || initializing) {
-    return (
-      <Container width={["100%"]} maxWidth={["100%"]} height={"440px"}>
-        <div />
-      </Container>
-    );
+  if (rescheduling.isLoading || eventType.isLoading) {
+    return LoadingIndicator ?? null;
+  }
+  if (rescheduling.isError || eventType.isError || !resolvedEventTypeId) {
+    return NoEventError ?? <EventTypeError />;
   }
 
-  if (
-    eventType?.type === "round_robin" &&
-    !props.kalendra_user_id &&
-    !props.bookingToBeRescheduledId
-  ) {
-    return (
-      <RoundRobinBooking
-        eventType={eventType}
-        {...props}
-        isError={isError}
-        isLoadingRootEventType={isLoading}
-        teamName={eventType?.teamName}
-      />
-    );
-  }
+  // A named host or a reschedule books that host; otherwise a round-robin event picks one.
+  const isRoundRobin = eventType.data?.type === "round_robin" && !kalendra_user_id && !booking;
   return (
-    <NormalBooking
+    <BookingCalendar
       {...props}
-      isError={isError}
-      isLoadingRootEventType={isLoading}
-      teamName={eventType?.teamName}
-      organizationId={eventType?.organization}
+      eventTypeId={resolvedEventTypeId}
+      orgId={rescheduling.data?.organization ?? eventType.data?.organization}
+      userId={booking?.user ?? kalendra_user_id}
+      bookingToBeRescheduled={booking}
+      responses={booking ? { ...(booking.responses ?? {}), ...(props.responses ?? {}) } : props.responses}
+      isRoundRobin={isRoundRobin}
+      members={isRoundRobin ? eventType.data?.members : undefined}
+      teamName={props.teamName ?? eventType.data?.teamName}
     />
   );
 };
 
-export const KalendraCalendar = (props: Props) => {
-  return (
-    <KalendraProvider>
-      <BookingCalendar {...props} />
-    </KalendraProvider>
-  );
-};
+/** Kalendra's booking calendar: books an event, or reschedules a booking by id. */
+export const KalendraCalendar = ({ calenderUrl, apiUrl, themeMode, styles, ...props }: KalendraCalendarProps) => (
+  <KalendraProvider calenderUrl={calenderUrl} apiUrl={apiUrl} themeMode={themeMode}>
+    <div style={styles}>
+      <ResolvedCalendar {...props} />
+    </div>
+  </KalendraProvider>
+);

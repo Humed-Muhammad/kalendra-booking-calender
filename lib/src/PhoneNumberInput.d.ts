@@ -11,5 +11,5 @@ type PhoneNumberInputProps = {
     field?: any;
     value?: string;
 };
-export declare const PhoneNumberInput: ({ id, name, label, placeholder, value, disabled, handleChange, }: PhoneNumberInputProps) => JSX.Element;
+export declare const PhoneNumberInput: ({ id, name, label, placeholder, value, disabled, handleChange, values, field, }: PhoneNumberInputProps) => JSX.Element;
 export {};

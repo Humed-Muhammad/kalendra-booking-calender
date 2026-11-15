@@ -1,56 +1,37 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { SendOptions } from "pocketbase";
-import { KalendraContext } from "../context/context";
+import { useCallback, useEffect, useState } from "react";
+import type { SendOptions } from "pocketbase";
+import { useKalendra } from "../context/context";
 
 type Props = {
   url: string;
   options: SendOptions;
   skip?: boolean;
 };
+
+/** A PocketBase custom route read through the package's client. */
 export const usePocketBaseEndpoint = <T>({ url, options, skip }: Props) => {
-  const { db } = useContext(KalendraContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const { client } = useKalendra();
+  const [isLoading, setIsLoading] = useState(!skip);
   const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-  const [success, setSuccess] = useState<boolean>(false);
   const [data, setData] = useState<T | undefined>();
 
-  const reset = () => {
-    setIsLoading(false);
-    setIsError(false);
-    setError(undefined);
-    setSuccess(false);
-    setData(undefined);
-  };
   const fetchData = useCallback(async () => {
+    if (skip) return;
     setIsLoading(true);
     setIsError(false);
-    setError(undefined);
-    setSuccess(false);
     try {
-      if (!skip) {
-        const response = await db?.send<T>(url, options);
-        setData(response);
-        setSuccess(true);
-      }
-    } catch (error) {
+      setData(await client.send<T>(url, options));
+    } catch {
       setIsError(true);
-      setError(error as Error);
     } finally {
       setIsLoading(false);
     }
-  }, [url, JSON.stringify(options), skip, db]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, url, JSON.stringify(options), skip]);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  return {
-    data,
-    error,
-    isLoading,
-    isError,
-    success,
-    reset,
-    refetch: fetchData,
-  };
+  return { data, isLoading, isError, refetch: fetchData };
 };

@@ -1,203 +1,85 @@
-# KalendraBookingCalendar React Component
+# kalendra
 
-`KalendraCalendar` is a themeable and customizable booking component built for managing events with features such as user-specific responses, event booking, with success and error handling. This component can be used in any React-based project and allows seamless integration with your application's and Kalendra scheduling platform.
+`KalendraCalendar` is Kalendra's booking calendar for React: it books an event, or reschedules a booking by id.
+The Kalendra web app and the Numuw admin both use it, so the calendar lives in one place.
 
-![Kalendra Calendar Screenshot](./image.png)
-
-## Installation
-
-To install the package, use npm or yarn:
+## Install
 
 ```bash
 npm install kalendra
-# or
-yarn add kalendra
 ```
 
-## Usage
+Peer dependencies: `react`, `react-dom` (17 or 18) and `styled-components` 6. Everything else is bundled.
+The bundle starts with `"use client"`, so it works in Next's App Router.
 
-Below is an example of how to use the `KalendraCalendar` component in your React application.
-
-### Importing the Component
+## Book an event
 
 ```tsx
 import { KalendraCalendar } from "kalendra";
+
+<KalendraCalendar
+  calenderUrl="https://backend.calendar.example.com"
+  eventTypeId="EVENT_TYPE_ID"
+  kalendra_user_id="HOST_ID" // leave out to let a round-robin event pick the host
+  responses={{ name: "Sara", email: "sara@example.com" }}
+  onSuccess={(booking) => console.log("booked", booking?.id)}
+  onError={(error) => console.error(error)}
+/>;
 ```
 
-### Example Usage
+## Reschedule a booking
 
 ```tsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { KalendraCalendar } from "kalendra"; // Import the component
-import { parentActions } from "./store/actions"; // Replace with actual path to your actions
-
-const CalendarExample = ({
-  theme,
-  event_type_id,
-  kalendra_user_id,
-  userInfo,
-  metadata,
-  duration,
-  user,
-}) => {
-  const navigate = useNavigate();
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  return (
-    <KalendraCalendar
-      styles={{
-        border: theme.borders[1],
-        borderRadius: theme.radii[1],
-      }}
-      eventTypeId={event_type_id}
-      kalendra_user_id={kalendra_user_id}
-      onSuccess={onSuccess}
-      onError={onError}
-      responses={{
-        name: "name"
-        email: "example@gmail.com",
-        "phone-number": "12345678",
-      }}
-      duration={duration}
-    />
-  );
-};
-
-export default CalendarExample;
+<KalendraCalendar calenderUrl={url} bookingToBeRescheduledId="BOOKING_ID" onSuccess={...} />
 ```
 
-### Props
+The booking's event, host and answers are reused, and the heading shows the booking's title. By default the calendar sends the move to Kalendra itself
+(`PATCH /reschedule-booking`, with `rescheduledBy` when given).
 
-The `KalendraCalendar` component accepts the following props:
+## Let your backend do the write
 
-- `styles` (object) - Custom CSS styles for the calendar component (optional).
-  - Example: `{ border: '1px solid #ccc', borderRadius: '8px' }`
-- `eventTypeId` (string) - The ID of the event type to be displayed in the calendar from the kalendra event types you created.
-- `kalendra_user_id` (string) - The unique user ID associated with the kalendra user.
-- `onSuccess` (function) - Callback function to be executed when the event is successfully added or processed.
-- `onError` (function) - Callback function to be executed when there is an error during the event handling.
-- `responses` (object) - To auto populate event questions if you have any.
-  - Example:
-    ```js
-    {
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      'phone-number': '555-555-5555',
-    }
-    ```
-- `duration` (number) - Duration of the event in minutes (optional) used to auto populate the event duration.
-- `LoadingIndicator` (JSX) - (Optional) A custom loading component to be displayed while the calendar is loading.
-- `NoEventError` (JSX) - (Optional) A custom component to be displayed when there are no events to display or when something goes wrong.
-
-### Example of `responses` Object:
-
-The `responses` object should contain necessary user and event data. It could look like this:
-
-```js
-responses={{
-  name: userInfo?.user?.full_name || userInfo?.full_name || '',
-  email: userInfo?.user?.email || userInfo?.email || '',
-  'db-email': userInfo?.user?.email || userInfo?.email || '',
-  'profile-id': userInfo?.id || '',
-  'phone-number': userInfo?.user?.phone_number || user.phone_number || '',
-  'recording-consent-metadata': JSON.stringify(metadata || {}),
-  session_uuid: uuid4(),
-}}
-```
-
-### Success and Error Callbacks
-
-The `onSuccess` and `onError` callbacks allow you to handle the outcome of the calendar interaction:
-
-- `onSuccess`: Triggered when the calendar operation completes successfully. It’s a good place to dispatch state updates or trigger side effects like navigation.
-- `onError`: Triggered if something goes wrong. You can use this callback to show an error message or handle any failures gracefully.
-
-### Example of `onSuccess` Usage:
+Pass `onSubmitBooking` and the calendar hands you the booking body (`BookingDraft`: start and end time, timezone,
+formatted times, answers, and `bookingId` when rescheduling) instead of calling Kalendra. Resolve when your backend
+has saved it; reject to show the error. `onSuccess` gets what you resolve with.
 
 ```tsx
-onSuccess={(response) => {
-  console.log(response);
-  setIsSuccess(true);
-  navigate?.();
-}}
+<KalendraCalendar
+  calenderUrl={url}
+  bookingToBeRescheduledId={bookingId}
+  onSubmitBooking={async (draft) => {
+    await api.reschedule(sessionId, draft);
+  }}
+/>
 ```
 
-### Example of `onError` Usage:
+## Props
 
-```tsx
-onError={(error) => {
-  console.log(error);
-  showToast({
-    message: 'Something went wrong',
-    type: 'error',
-  });
-}}
+| Prop | What it does |
+| --- | --- |
+| `calenderUrl` (required) | Kalendra's PocketBase URL |
+| `apiUrl` | Root of Kalendra's custom routes (`/availability/...`), when it isn't `calenderUrl` (a local proxy) |
+| `eventTypeId` | The event to book; not needed when rescheduling |
+| `kalendra_user_id` | The host to book; without it a round-robin event picks one |
+| `bookingToBeRescheduledId` | Reschedule this booking |
+| `onSubmitBooking` | Take over the write (see above) |
+| `onSuccess`, `onError` | Called after the booking or move |
+| `responses` | Prefilled answers to the booking questions |
+| `duration` | The first duration to show |
+| `timezone` | The timezone to show times in at first; the browser's otherwise |
+| `rescheduledBy` | Kalendra user id recorded on a direct reschedule |
+| `themeMode` | `"light"` (default) or `"dark"` |
+| `content` | Text overrides (`book`, `noAvailableSlots`, `tryNextMonth`, ...) |
+| `direction`, `teamName`, `styles` | Layout direction, round-robin team name, wrapper style |
+| `LoadingIndicator`, `NoEventError` | Shown while loading, and when the event or booking can't be loaded |
+
+`MeetingScheduled` (a booking summary) is exported too.
+
+## Build
+
+```bash
+yarn install
+yarn build   # tsc, then rollup to lib/src
 ```
 
-## Additional Notes
-
-- The `styles` prop allows for full customization of the calendar's border and radius using your app's theme. Simply pass an object with the desired CSS properties.
-- `duration` should be passed as a number representing the duration of the event in minutes.
-- Make sure to manage the state and the responses object dynamically depending on the user's data or application context.
-
-## Dependencies
-
-- `uuid`: Ensure you have the `uuid` library installed for generating unique session IDs.
-
-  ```bash
-  npm install uuid
-  # or
-  yarn add uuid
-  ```
-
-- `react-redux`: Used for dispatching actions (if you're using Redux).
-
-  ```bash
-  npm install react-redux
-  # or
-  yarn add react-redux
-  ```
-
-- `react-router-dom`: For navigation handling, if your application uses it.
-  ```bash
-  npm install react-router-dom
-  # or
-  yarn add react-router-dom
-  ```
-
-# Theming
-
-```ts
-// Example theme (Our dark theme)
-// You can create your own theme by modifying this object
-// And create dark or light as you like or any other theme
-export const lightTheme = {
-  breakpoints: ["320px", "576px", "768px", "992px", "1200px", "1400px"],
-  colors: {
-    rootLoaderColor: "#ffa516", // The color of the loader when the KalendraCalander is initializing
-    background: "white",
-    border: "#cbd5e1",
-    lightGray: "#cbd5e1",
-    text: "black",
-    headCell: "black",
-    dayHoverBg: "#3b3b4f",
-    dayHoverText: "white",
-    daySelectedBg: "#1e293b",
-    daySelectedText: "#f8fafc",
-    dayDisabled: "#cbd5e1",
-    dayRangeMiddle: "#475569",
-    icon: "#475569",
-    transparent: "transparent",
-    dayBg: "#cbd5e1",
-    error: "#f87171",
-  },
-};
-```
-
-## License
-
-This software is under a **Commercial Software License**.
-
-📩 For licensing and inquiries, contact: humedessie@gmail.com  
-📄 See the full license in the [LICENSE](./LICENSE) file.
+The source of truth is this repo. It was rebuilt in 0.2.0 from the Kalendra web app's calendar (server-side
+availability, `/event/book/managed`), which now uses this package.
