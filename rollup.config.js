@@ -21,7 +21,9 @@ export default merge(baseConfig, [
       // Next's App Router must treat the calendar as a client component.
       banner: '"use client";',
     },
-    context: "window",
+    // Top-level `this` in tsc's ES5 helpers (`this && this.__assign`). Must exist
+    // on the server too: "window" throws during Next.js SSR/prerender.
+    context: "globalThis",
     plugins: [
       // Bundles the calendar's own dependencies; peers stay external.
       nodeResolve({ browser: true, extensions: [".js", ".mjs", ".jsx"] }),
