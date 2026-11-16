@@ -4,6 +4,8 @@ import type { ThemeMode } from "./types";
 export type { Booking, BookingDraft, ThemeMode } from "./types";
 export type { ContentType } from "./types/type";
 export { MeetingScheduled } from "./MeetingScheduled";
+export { describeTimezone, formatGMTOffset, listTimezones, matchesTimezone, timezoneOffsetLabel, zoneOffsetMinutes, } from "./timezones";
+export type { TimezoneOption } from "./timezones";
 export type KalendraCalendarProps = Omit<BookingCalendarProps, "bookingToBeRescheduled" | "orgId" | "userId" | "members" | "isRoundRobin" | "eventTypeId"> & {
     /** Kalendra's PocketBase URL. */
     calenderUrl: string;

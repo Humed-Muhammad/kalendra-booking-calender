@@ -8,6 +8,15 @@ import type { GetBookingRes, GetEventTypeRes, ThemeMode } from "./types";
 export type { Booking, BookingDraft, ThemeMode } from "./types";
 export type { ContentType } from "./types/type";
 export { MeetingScheduled } from "./MeetingScheduled";
+export {
+  describeTimezone,
+  formatGMTOffset,
+  listTimezones,
+  matchesTimezone,
+  timezoneOffsetLabel,
+  zoneOffsetMinutes,
+} from "./timezones";
+export type { TimezoneOption } from "./timezones";
 
 export type KalendraCalendarProps = Omit<
   BookingCalendarProps,

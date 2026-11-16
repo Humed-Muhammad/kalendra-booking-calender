@@ -7,88 +7,13 @@ import {
 } from "react";
 import styled from "styled-components";
 import { format } from "date-fns";
-import { getTimezoneOffset } from "date-fns-tz";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { zoneCountries } from "./timezoneCountries";
+import { listTimezones, matchesTimezone, type TimezoneOption } from "./timezones";
+import { browserTimezone } from "./utils";
 
-type Zone = {
-  value: string;
-  city: string;
-  country: string;
-  /** City, plus tzdb's note where a country has several zones ("New York · Eastern (most areas)"). */
-  detail: string;
-  offsetMinutes: number;
-  offsetLabel: string;
-  searchText: string;
-};
+type Zone = TimezoneOption;
 
 type Row = { zone: Zone; isYours?: boolean };
-
-/** "GMT+3", "GMT+5:30", "GMT-3:30", "GMT+0". */
-export const formatGMTOffset = (offsetMinutes: number) => {
-  const sign = offsetMinutes < 0 ? "-" : "+";
-  const abs = Math.abs(offsetMinutes);
-  const minutes = abs % 60;
-  return `GMT${sign}${Math.floor(abs / 60)}${minutes ? `:${String(minutes).padStart(2, "0")}` : ""}`;
-};
-
-/** The zone's offset on `date` (minutes), so a day after a DST change gets that day's offset. */
-export const zoneOffsetMinutes = (timezone: string, date: Date) =>
-  Math.round(getTimezoneOffset(timezone, date) / 60000);
-
-const normalize = (text: string) => text.toLowerCase().replace(/_/g, " ");
-
-const UTC = "UTC";
-
-// Country names from the browser ("ET" -> "Ethiopia"); the code itself where unsupported.
-const regionNames = (() => {
-  try {
-    return new Intl.DisplayNames(["en"], { type: "region" });
-  } catch {
-    return undefined;
-  }
-})();
-
-const countryName = (code: string) => {
-  try {
-    return regionNames?.of(code) ?? code;
-  } catch {
-    return code;
-  }
-};
-
-const describeZone = (value: string, date: Date): Zone | null => {
-  const offsetMinutes = zoneOffsetMinutes(value, date);
-  // A zone this browser's time data doesn't know.
-  if (Number.isNaN(offsetMinutes)) return null;
-  const parts = value.split("/");
-  const city = parts[parts.length - 1].replace(/_/g, " ");
-  const known = zoneCountries[value];
-  // A zone outside zone.tab (an alias such as Asia/Calcutta) falls back to its region.
-  const country = known
-    ? countryName(known.country)
-    : value === UTC
-      ? UTC
-      : parts.slice(0, -1).join(" / ").replace(/_/g, " ") || city;
-  const detail =
-    value === UTC
-      ? "Coordinated Universal Time"
-      : known?.note
-        ? `${city} · ${known.note}`
-        : city;
-  const offsetLabel = formatGMTOffset(offsetMinutes);
-  return {
-    value,
-    city,
-    country,
-    detail,
-    offsetMinutes,
-    offsetLabel,
-    searchText: normalize(
-      `${value} ${country} ${known?.note ?? ""} ${offsetLabel} UTC${offsetLabel.slice(3)}`,
-    ),
-  };
-};
 
 /** Scrolls the list only; scrollIntoView would also scroll the page (and slide rows under a resting pointer). */
 const scrollOptionIntoView = (list: HTMLElement | null, index: number, center = false) => {
@@ -99,14 +24,6 @@ const scrollOptionIntoView = (list: HTMLElement | null, index: number, center = 
   if (center) list.scrollTop = top - (list.clientHeight - option.offsetHeight) / 2;
   else if (top < list.scrollTop) list.scrollTop = top;
   else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
-};
-
-const browserTimezone = () => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch {
-    return undefined;
-  }
 };
 
 const LIST_MAX_HEIGHT = 280;
@@ -137,32 +54,17 @@ export const TimezonePicker = ({ value, onChange, date, disabled }: Props) => {
 
   const day = date ?? new Date();
   const dayKey = day.toDateString();
-  const yours = browserTimezone();
-  const zones = useMemo(() => {
-    const values = [...Object.keys(zoneCountries), UTC];
-    // The picked and the viewer's zones may be aliases outside zone.tab.
-    for (const extra of [value, yours]) {
-      if (extra && !values.includes(extra)) values.push(extra);
-    }
-    return values
-      .map((zoneValue) => describeZone(zoneValue, day))
-      .filter((zone): zone is Zone => zone !== null)
-      .sort(
-        (a, b) =>
-          a.country.localeCompare(b.country) || a.city.localeCompare(b.city),
-      );
-    // Recompute only when the day (not the Date instance) changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayKey, value, yours]);
+  const yours = browserTimezone;
+  // The picked and the viewer's zones may be aliases outside zone.tab, so they're added.
+  // Recompute only when the day (not the Date instance) changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const zones = useMemo(() => listTimezones(day, [value, yours]), [dayKey, value, yours]);
 
   const selected = zones.find((zone) => zone.value === value);
 
   const rows = useMemo<Row[]>(() => {
-    const terms = normalize(query).trim().split(/\s+/).filter(Boolean);
-    if (terms.length) {
-      return zones
-        .filter((zone) => terms.every((term) => zone.searchText.includes(term)))
-        .map((zone) => ({ zone }));
+    if (query.trim()) {
+      return zones.filter((zone) => matchesTimezone(zone, query)).map((zone) => ({ zone }));
     }
     // With no search, the viewer's own zone is pinned on top (when it isn't the one picked).
     const yourZone =

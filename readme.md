@@ -31,6 +31,8 @@ import { KalendraCalendar } from "kalendra";
 
 The calendar starts in the browser's timezone (or the `timezone` prop). Its picker lists the tzdata zones A–Z by country, shows each zone's GMT offset on the day being booked (so daylight saving is included, e.g. Beirut GMT+2 in November, GMT+3 in April), and searches by country, city or offset. The zone-to-country table (`src/timezoneCountries.ts`) is generated from tzdata `zone.tab`.
 
+The same zone logic is exported for an app's own pickers: `listTimezones(date?, extras?)` (A–Z by country, offsets for `date`), `matchesTimezone(zone, query)`, `describeTimezone(id, date?)`, `timezoneOffsetLabel(id, date?)` ("GMT+3"), `zoneOffsetMinutes`, `formatGMTOffset`, and the `TimezoneOption` type.
+
 ## Reschedule a booking
 
 ```tsx
